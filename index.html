@@ -70,7 +70,7 @@ body { background: var(--kada-bg); margin: 0; }
   <div class="row g-3 mb-4">
     <div class="col-md-3">
       <div class="summary-card">
-        <div class="summary-num" style="color:#FA6B6B;">4</div>
+        <div class="summary-num" style="color:#FA6B6B;">5</div>
         <div style="font-size:13px;color:#999;">전체 작업</div>
       </div>
     </div>
@@ -82,7 +82,7 @@ body { background: var(--kada-bg); margin: 0; }
     </div>
     <div class="col-md-3">
       <div class="summary-card">
-        <div class="summary-num" style="color:#ccc;">4</div>
+        <div class="summary-num" style="color:#ccc;">5</div>
         <div style="font-size:13px;color:#999;">대기</div>
       </div>
     </div>
@@ -97,6 +97,37 @@ body { background: var(--kada-bg); margin: 0; }
 
 <!-- Tasks -->
 <div class="container pb-5">
+
+  <!-- Task 0: 인지도 조사 (가장 중요!) -->
+  <div class="task-card priority-high" style="border-left-width:6px;box-shadow:0 2px 12px rgba(250,107,107,0.15);">
+    <div class="d-flex align-items-start gap-3">
+      <div class="task-num" style="background:linear-gradient(135deg,#d32f2f,#ff5252);font-size:14px;">★</div>
+      <div style="flex:1;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 style="font-weight:700;margin:0;">2026 도핑방지 인지도 조사 시스템 개발</h5>
+          <div>
+            <span class="badge badge-priority" style="background:#f5f5f5;color:#666;">대기</span>
+            <span class="badge badge-priority" style="background:#ffebee;color:#c62828;">🔴 최우선</span>
+          </div>
+        </div>
+        <p style="color:#666;font-size:14px;margin:0;">온라인 교육 수료 후 인지도 조사(5문항, 4점척도) 의무화. 1 아이디 = 1회만 진행.</p>
+
+        <div class="mt-3">
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 DB 모델 설계 (SurveyResponse: user FK, 응답 JSON, 조사년도)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 교육 수강 스텝에 "인지도 조사" 단계 추가 (마지막 영상 뒤, 수료 전)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 폼 UI 개발 (5문항 × 4점 척도)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 이미 조사 완료한 유저는 자동 스킵 로직 (1 아이디 = 1회)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 관리자 통계 페이지 (연령별/문항별 집계 - 기존 조사결과 포맷)</div>
+        </div>
+
+        <div class="note-box">
+          <i class="bi bi-file-earmark-code" style="color:var(--kada-primary);"></i>
+          <strong>인터랙티브 프로토타입:</strong>
+          <a href="survey-prototype.html" class="ref-link ms-2" style="font-weight:700;">인지도 조사 UI/UX 흐름 보기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Task 1: 모바일 최적화 -->
   <div class="task-card priority-high">
