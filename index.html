@@ -169,7 +169,8 @@ body { background: var(--kada-bg); margin: 0; }
               <div class="proto-tab" onclick="showProto('survey',this)">② 인지도 조사 폼</div>
               <div class="proto-tab" onclick="showProto('done',this)">③ 수료 완료</div>
               <div class="proto-tab" onclick="showProto('skip',this)">④ 이미 완료 시 스킵</div>
-              <div class="proto-tab" onclick="showProto('admin',this)" style="background:#2c2c3e;color:#aaa;border-color:#444;">🔧 securepanel 관리</div>
+              <div class="proto-tab" onclick="showProto('mgr-stats',this)" style="border-color:var(--kada-primary);">📊 교육관리자 통계</div>
+              <div class="proto-tab" onclick="showProto('admin',this)" style="background:#2c2c3e;color:#aaa;border-color:#444;">🔧 securepanel</div>
               <div class="proto-tab" onclick="showProto('errors',this)" style="background:#ffebee;color:#c62828;border-color:#ef9a9a;">⚠️ 오류 처리 가이드</div>
             </div>
 
@@ -319,68 +320,163 @@ body { background: var(--kada-bg); margin: 0; }
               </div>
             </div>
 
-            <!-- ⑤ securepanel 관리자 -->
-            <div id="proto-admin" class="proto-screen">
-              <div style="background:#1a1a2e;border-radius:10px;padding:16px;color:white;">
-                <div style="font-size:11px;color:#aaa;margin-bottom:4px;">securepanel / EDUCATIONS</div>
-                <div style="font-size:16px;font-weight:700;color:#4fc3f7;margin-bottom:12px;">📊 인지도 조사 응답 목록</div>
-
-                <!-- 필터 바 -->
-                <div style="background:#16213e;border-radius:6px;padding:10px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                  <span style="font-size:11px;color:#aaa;">필터:</span>
-                  <select style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;"><option>2026년</option><option>2025년</option></select>
-                  <select style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;"><option>전체 연령</option><option>10대</option><option>20대</option><option>30대</option><option>40대</option><option>50대 이상</option></select>
-                  <input placeholder="이름/아이디 검색" style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;width:140px;">
-                  <span style="font-size:11px;color:#4fc3f7;margin-left:auto;">총 41,254건</span>
-                </div>
-
-                <!-- 테이블 -->
-                <table style="width:100%;border-collapse:collapse;font-size:11px;">
-                  <thead><tr style="border-bottom:1px solid #444;color:#aaa;">
-                    <th style="padding:6px;text-align:left;">응답자</th><th style="padding:6px;">연령</th><th style="padding:6px;">Q1</th><th style="padding:6px;">Q2</th><th style="padding:6px;">Q3</th><th style="padding:6px;">Q4</th><th style="padding:6px;">Q5</th><th style="padding:6px;">총점</th><th style="padding:6px;">응답일</th>
-                  </tr></thead>
-                  <tbody>
-                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">한정환</td><td style="padding:6px;text-align:center;">30대</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">19</td><td style="padding:6px;">2026.04.09</td></tr>
-                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">김도영</td><td style="padding:6px;text-align:center;">20대</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">16</td><td style="padding:6px;">2026.04.08</td></tr>
-                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">박선아</td><td style="padding:6px;text-align:center;">10대</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">20</td><td style="padding:6px;">2026.04.07</td></tr>
-                  </tbody>
-                </table>
-
-                <!-- 통계 요약 -->
-                <div style="margin-top:14px;background:#16213e;border-radius:6px;padding:12px;">
-                  <div style="font-size:12px;font-weight:700;color:#4fc3f7;margin-bottom:8px;">📈 문항별 평균 (2026년)</div>
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
-                      <div style="font-size:10px;color:#aaa;">Q1 인지 여부</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">92.49</div>
+            <!-- ⑤ 교육관리자 > 교육 통계 (실제 eKADA 스타일 재현) -->
+            <div id="proto-mgr-stats" class="proto-screen">
+              <div style="border-radius:10px;overflow:hidden;border:1px solid #eee;">
+                <!-- 실제 eKADA 통계 헤더 재현 -->
+                <div style="background:linear-gradient(135deg,#2a2356,#3a3580);padding:20px 24px;color:white;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                    <div>
+                      <div style="font-size:18px;font-weight:800;">KADA 도핑방지교육 <span style="color:#a5b4fc;">통계</span></div>
+                      <div style="font-size:11px;opacity:0.7;">2026년 인지도 조사 실적 대시보드</div>
                     </div>
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
-                      <div style="font-size:10px;color:#aaa;">Q2 제재 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">91.25</div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                      <span style="font-size:11px;opacity:0.7;">← 관리도구로 이동</span>
+                      <select style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:11px;"><option>2026년</option><option>2025년</option></select>
+                      <span style="background:#ef4444;color:white;font-size:10px;padding:3px 10px;border-radius:12px;font-weight:700;">LIVE</span>
                     </div>
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
-                      <div style="font-size:10px;color:#aaa;">Q3 책임 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">92.50</div>
+                  </div>
+                  <!-- 요약 카드 -->
+                  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;">
+                      <div style="font-size:11px;opacity:0.7;">총 응답수</div>
+                      <div style="font-size:26px;font-weight:800;color:white;">41,254</div>
                     </div>
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
-                      <div style="font-size:10px;color:#aaa;">Q4 TUE 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">90.0</div>
+                    <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;">
+                      <div style="font-size:11px;opacity:0.7;">2025 종합</div>
+                      <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,0.5);">91.6</div>
                     </div>
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
-                      <div style="font-size:10px;color:#aaa;">Q5 교육 효과</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">91.75</div>
+                    <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.08);border-radius:10px;padding:12px;text-align:center;">
+                      <div style="font-size:11px;opacity:0.7;">2026 목표</div>
+                      <div style="font-size:26px;font-weight:800;color:#86efac;">91.5</div>
                     </div>
-                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;border:1px solid #4fc3f7;">
-                      <div style="font-size:10px;color:#aaa;">종합</div><div style="font-size:18px;font-weight:800;color:#fff;">91.6</div>
+                    <div style="flex:1;min-width:100px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:12px;text-align:center;">
+                      <div style="font-size:11px;opacity:0.7;">2026 실적</div>
+                      <div style="font-size:26px;font-weight:800;color:#93c5fd;">91.6</div>
                     </div>
                   </div>
                 </div>
 
-                <div style="margin-top:10px;background:#16213e;border-radius:6px;padding:12px;">
-                  <div style="font-size:12px;font-weight:700;color:#4fc3f7;margin-bottom:8px;">👥 연령별 응답 현황</div>
-                  <table style="width:100%;font-size:11px;border-collapse:collapse;">
-                    <tr style="color:#aaa;border-bottom:1px solid #333;"><th style="padding:4px;text-align:left;">연령</th><th style="padding:4px;text-align:right;">10대</th><th style="padding:4px;text-align:right;">20대</th><th style="padding:4px;text-align:right;">30대</th><th style="padding:4px;text-align:right;">40대</th><th style="padding:4px;text-align:right;">50대+</th><th style="padding:4px;text-align:right;color:#4fc3f7;">계</th></tr>
-                    <tr><td style="padding:4px;">응답수</td><td style="padding:4px;text-align:right;">12,714</td><td style="padding:4px;text-align:right;">12,737</td><td style="padding:4px;text-align:right;">8,352</td><td style="padding:4px;text-align:right;">5,590</td><td style="padding:4px;text-align:right;">1,861</td><td style="padding:4px;text-align:right;font-weight:700;color:#4fc3f7;">41,254</td></tr>
-                  </table>
-                </div>
+                <!-- 본문: 문항별 결과 -->
+                <div style="background:white;padding:20px 24px;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                    <span style="background:var(--kada-primary);color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</span>
+                    <span style="font-size:16px;font-weight:700;">조사문항별 결과</span>
+                  </div>
+                  <div style="background:white;border:1px solid #eee;border-radius:10px;padding:16px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                      <thead><tr style="border-bottom:2px solid #e5e7eb;">
+                        <th style="padding:8px 6px;text-align:left;color:#666;font-size:11px;">도핑방지 인지도 조사 주요항목</th>
+                        <th style="padding:8px 6px;text-align:center;color:#666;font-size:11px;">2023</th>
+                        <th style="padding:8px 6px;text-align:center;color:#666;font-size:11px;">2024</th>
+                        <th style="padding:8px 6px;text-align:center;color:var(--kada-primary);font-size:11px;font-weight:700;">2025</th>
+                        <th style="padding:8px 6px;text-align:center;color:#666;font-size:11px;">증감</th>
+                      </tr></thead>
+                      <tbody>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 6px;">① 도핑(금지약물 사용 또는 복용)에 대한 인지 여부</td><td style="padding:8px 6px;text-align:center;">89.68</td><td style="padding:8px 6px;text-align:center;">87.72</td><td style="padding:8px 6px;text-align:center;font-weight:700;">92.49</td><td style="padding:8px 6px;text-align:center;color:#16a34a;">△4.77</td></tr>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 6px;">② 도핑 사실 발각 시 규정위반으로 제재 부과 인지</td><td style="padding:8px 6px;text-align:center;">90.29</td><td style="padding:8px 6px;text-align:center;">92.81</td><td style="padding:8px 6px;text-align:center;font-weight:700;">91.25</td><td style="padding:8px 6px;text-align:center;color:#dc2626;">▽1.56</td></tr>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 6px;">③ 사용(복용)한 약물 책임이 선수에게 있음을 인지</td><td style="padding:8px 6px;text-align:center;">92.01</td><td style="padding:8px 6px;text-align:center;">93.73</td><td style="padding:8px 6px;text-align:center;font-weight:700;">92.50</td><td style="padding:8px 6px;text-align:center;color:#dc2626;">▽1.23</td></tr>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 6px;">④ 치료목적사용면책(TUE) 제도에 대한 인지</td><td style="padding:8px 6px;text-align:center;">89.60</td><td style="padding:8px 6px;text-align:center;">87.28</td><td style="padding:8px 6px;text-align:center;font-weight:700;">90.0</td><td style="padding:8px 6px;text-align:center;color:#16a34a;">△2.72</td></tr>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:8px 6px;">⑤ 한국도핑방지위원회 교육/홍보활동의 효과</td><td style="padding:8px 6px;text-align:center;">94.45</td><td style="padding:8px 6px;text-align:center;">96.71</td><td style="padding:8px 6px;text-align:center;font-weight:700;">91.75</td><td style="padding:8px 6px;text-align:center;color:#16a34a;">△4.00</td></tr>
+                        <tr style="background:#f8fafc;font-weight:700;"><td style="padding:8px 6px;">종합</td><td style="padding:8px 6px;text-align:center;">91.21</td><td style="padding:8px 6px;text-align:center;">91.45</td><td style="padding:8px 6px;text-align:center;color:var(--kada-primary);">91.6</td><td style="padding:8px 6px;text-align:center;">△0.15</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
 
-                <div style="font-size:11px;color:#666;margin-top:8px;">
-                  <strong>개발:</strong> <code>securepanel/educations/surveyresponse/</code> 에 Django Admin 모델 등록. 엑셀 다운로드 action 추가.
+                  <!-- 응답자 기본사항 -->
+                  <div style="display:flex;align-items:center;gap:8px;margin:20px 0 14px;">
+                    <span style="background:var(--kada-primary);color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</span>
+                    <span style="font-size:16px;font-weight:700;">응답자 기본사항</span>
+                  </div>
+                  <div style="background:white;border:1px solid #eee;border-radius:10px;padding:16px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                      <thead><tr style="border-bottom:2px solid #e5e7eb;color:#666;">
+                        <th style="padding:6px;text-align:left;">인원 (명)</th><th style="padding:6px;text-align:right;">10대</th><th style="padding:6px;text-align:right;">20대</th><th style="padding:6px;text-align:right;">30대</th><th style="padding:6px;text-align:right;">40대</th><th style="padding:6px;text-align:right;">50대 이상</th><th style="padding:6px;text-align:right;">연령 무응답</th><th style="padding:6px;text-align:right;font-weight:700;">계</th>
+                      </tr></thead>
+                      <tbody>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;font-weight:600;">연령별</td><td style="padding:6px;text-align:right;">12,714</td><td style="padding:6px;text-align:right;">12,737</td><td style="padding:6px;text-align:right;">8,352</td><td style="padding:6px;text-align:right;">5,590</td><td style="padding:6px;text-align:right;">1,861</td><td style="padding:6px;text-align:right;">0</td><td style="padding:6px;text-align:right;font-weight:700;">41,254</td></tr>
+                        <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;font-weight:600;">(증가율)</td><td style="padding:6px;text-align:right;color:#dc2626;">-59%</td><td style="padding:6px;text-align:right;color:#16a34a;">+179</td><td style="padding:6px;text-align:right;color:#16a34a;">+694</td><td style="padding:6px;text-align:right;color:#16a34a;">+4,267</td><td style="padding:6px;text-align:right;color:#16a34a;">+143</td><td style="padding:6px;text-align:right;color:#dc2626;">-100</td><td style="padding:6px;text-align:right;">+8.2</td></tr>
+                        <tr><td style="padding:6px;font-weight:600;">전년도</td><td style="padding:6px;text-align:right;">31,464</td><td style="padding:6px;text-align:right;">4,563</td><td style="padding:6px;text-align:right;">1,051</td><td style="padding:6px;text-align:right;">128</td><td style="padding:6px;text-align:right;">765</td><td style="padding:6px;text-align:right;">-</td><td style="padding:6px;text-align:right;">38,122</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style="text-align:right;margin-top:12px;">
+                    <button class="btn btn-sm" style="background:white;color:var(--kada-primary);border:1px solid var(--kada-primary);border-radius:6px;padding:6px 14px;font-size:12px;"><i class="bi bi-download"></i> 엑셀 다운로드</button>
+                  </div>
+                  <div style="background:#f8f9fa;border-radius:6px;padding:8px 12px;margin-top:10px;font-size:11px;color:#666;">
+                    <strong>개발:</strong> 기존 <code>/educations/manager/statistics/</code> 페이지에 "인지도 조사" 탭 추가 or 별도 하위 메뉴.
+                    기존 통계 페이지의 년도 선택기·엑셀 다운로드 패턴 재활용.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ⑥ securepanel (Django Admin 다크 테마 - 실제 스타일 재현) -->
+            <div id="proto-admin" class="proto-screen">
+              <div style="border-radius:10px;overflow:hidden;border:1px solid #333;">
+                <!-- Django Admin 헤더 -->
+                <div style="background:#44627a;padding:8px 16px;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="color:#f5dd5d;font-size:14px;font-weight:700;">도핑방지위원회</span>
+                  <span style="color:#ccc;font-size:11px;">환영합니다, HAN.</span>
+                </div>
+                <!-- 브레드크럼 -->
+                <div style="background:#293a48;padding:6px 16px;font-size:11px;">
+                  <span style="color:#ccc;">홈</span> <span style="color:#666;">›</span> <span style="color:#ccc;">Educations</span> <span style="color:#666;">›</span> <span style="color:white;">인지도 조사 응답 목록</span>
+                </div>
+                <!-- 본문 -->
+                <div style="background:#1a2634;padding:16px;color:white;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:15px;">변경할 인지도 조사 응답 선택</span>
+                    <span style="font-size:11px;color:#79aec8;cursor:pointer;">인지도 조사 응답 추가 +</span>
+                  </div>
+                  <!-- 검색 -->
+                  <div style="margin-bottom:10px;display:flex;gap:6px;">
+                    <span style="color:#ccc;font-size:14px;">🔍</span>
+                    <input style="background:#293a48;border:1px solid #4a6b82;color:white;padding:4px 8px;font-size:12px;border-radius:3px;width:200px;" placeholder="">
+                    <button style="background:#44627a;color:white;border:none;padding:4px 12px;font-size:12px;border-radius:3px;">검색</button>
+                  </div>
+                  <!-- 액션 -->
+                  <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center;font-size:11px;">
+                    <span style="color:#ccc;">액션:</span>
+                    <select style="background:#293a48;color:white;border:1px solid #4a6b82;padding:3px 6px;font-size:11px;border-radius:3px;">
+                      <option>----------</option>
+                      <option>엑셀로 내보내기</option>
+                      <option>선택 항목 삭제</option>
+                    </select>
+                    <button style="background:#44627a;color:white;border:none;padding:3px 10px;font-size:11px;border-radius:3px;">실행</button>
+                    <span style="color:#888;">0개가 41,254개 중에 선택됨.</span>
+                  </div>
+                  <!-- 테이블 -->
+                  <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                    <thead><tr style="background:#293a48;border-bottom:1px solid #4a6b82;">
+                      <th style="padding:6px;width:24px;"><input type="checkbox" style="accent-color:#79aec8;"></th>
+                      <th style="padding:6px;text-align:left;color:#ccc;">응답자</th>
+                      <th style="padding:6px;text-align:left;color:#ccc;">조사년도</th>
+                      <th style="padding:6px;text-align:center;color:#ccc;">Q1</th>
+                      <th style="padding:6px;text-align:center;color:#ccc;">Q2</th>
+                      <th style="padding:6px;text-align:center;color:#ccc;">Q3</th>
+                      <th style="padding:6px;text-align:center;color:#ccc;">Q4</th>
+                      <th style="padding:6px;text-align:center;color:#ccc;">Q5</th>
+                      <th style="padding:6px;text-align:left;color:#ccc;">CREATED AT</th>
+                    </tr></thead>
+                    <tbody style="background:#1e2e3e;">
+                      <tr style="border-bottom:1px solid #293a48;"><td style="padding:6px;"><input type="checkbox"></td><td style="padding:6px;"><a style="color:#79aec8;text-decoration:none;">한정환</a></td><td style="padding:6px;">2026</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;">2026년 4월 9일 10:33 오전</td></tr>
+                      <tr style="border-bottom:1px solid #293a48;background:#22334a;"><td style="padding:6px;"><input type="checkbox"></td><td style="padding:6px;"><a style="color:#79aec8;text-decoration:none;">김도영</a></td><td style="padding:6px;">2026</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;">2026년 4월 8일 2:11 오후</td></tr>
+                      <tr style="border-bottom:1px solid #293a48;"><td style="padding:6px;"><input type="checkbox"></td><td style="padding:6px;"><a style="color:#79aec8;text-decoration:none;">블루필</a></td><td style="padding:6px;">2026</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;">2026년 4월 9일 1:44 오후</td></tr>
+                    </tbody>
+                  </table>
+                  <div style="font-size:11px;color:#888;margin-top:6px;">41,254 인지도 조사 응답 목록</div>
+                </div>
+                <!-- 우측 필터 (인라인 표현) -->
+                <div style="background:#1e2e3e;padding:10px 16px;border-top:1px solid #293a48;">
+                  <span style="color:#ffc;font-size:11px;font-weight:700;">필터 |</span>
+                  <span style="font-size:11px;color:#79aec8;margin-left:8px;">조사년도: </span><span style="font-size:11px;color:white;">2026 | 2025</span>
+                  <span style="font-size:11px;color:#79aec8;margin-left:16px;">응답일: </span><span style="font-size:11px;color:white;">언제나 | 오늘 | 지난 7일 | 이번 달</span>
+                </div>
+                <div style="background:#293a48;padding:8px 16px;font-size:11px;color:#666;">
+                  <strong>개발:</strong> <code>educations/admin.py</code>에 SurveyResponse 모델 등록. list_display, list_filter, search_fields, export action 추가.
+                  URL: <code>/securepanel/educations/surveyresponse/</code>
                 </div>
               </div>
             </div>
