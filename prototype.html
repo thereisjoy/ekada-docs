@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경력증명 발급 프로세스 개선 - 인터랙티브 프로토타입</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+:root {
+  --kada-primary: #4285f4;
+  --kada-success: #28a745;
+  --kada-warning: #FFAE1F;
+  --kada-danger: #FA6B6B;
+  --kada-gray: #6c757d;
+  --kada-bg: #f0f5ff;
+  --kada-sidebar: #fff;
+}
+* { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+body { background: var(--kada-bg); margin: 0; }
+
+/* Top Navigation */
+.top-nav {
+  background: #1a1a2e;
+  color: white;
+  padding: 8px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.top-nav .role-tabs { display: flex; gap: 4px; }
+.top-nav .role-tab {
+  padding: 8px 20px;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .2s;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+}
+.top-nav .role-tab.active { background: var(--kada-primary); color: white; }
+.top-nav .role-tab:hover:not(.active) { background: rgba(255,255,255,0.2); }
+
+/* Flow indicator */
+.flow-bar {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--kada-gray);
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #f5f5f5;
+}
+.flow-step.active { background: var(--kada-primary); color: white; font-weight: 600; }
+.flow-step.done { background: #e8f5e9; color: var(--kada-success); }
+.flow-arrow { color: #ccc; font-size: 18px; }
+
+/* Main layout */
+.main-container { display: flex; min-height: calc(100vh - 90px); }
+.sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e8e8e8;
+  padding: 20px 0;
+  flex-shrink: 0;
+}
+.sidebar-item {
+  padding: 10px 24px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-item:hover { background: #f5f8ff; }
+.sidebar-item.active { background: var(--kada-primary); color: white; border-radius: 0; }
+.content { flex: 1; padding: 24px 32px; max-width: 1200px; }
+
+/* Cards */
+.kada-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Status badges */
+.badge-pending { background: #f5f5f5; color: var(--kada-gray); border: 1px solid #ddd; }
+.badge-approved { background: var(--kada-success); color: white; }
+.badge-retry { background: var(--kada-warning); color: white; }
+.badge-rejected { background: var(--kada-danger); color: white; }
+
+/* Table */
+.kada-table { width: 100%; border-collapse: collapse; }
+.kada-table th { font-size: 13px; font-weight: 600; color: #555; padding: 12px; border-bottom: 2px solid #eee; text-align: left; }
+.kada-table td { font-size: 14px; padding: 14px 12px; border-bottom: 1px solid #f0f0f0; }
+.kada-table tr:hover { background: #fafbff; cursor: pointer; }
+
+/* Buttons */
+.btn-kada { background: var(--kada-primary); color: white; border: none; border-radius: 24px; padding: 10px 28px; font-weight: 600; }
+.btn-kada:hover { background: #3367d6; color: white; }
+.btn-approve { background: var(--kada-primary); color: white; border: none; border-radius: 24px; padding: 10px 28px; }
+.btn-retry-action { background: white; color: var(--kada-warning); border: 1px solid var(--kada-warning); border-radius: 24px; padding: 10px 28px; }
+.btn-reject-action { background: white; color: var(--kada-danger); border: 1px solid var(--kada-danger); border-radius: 24px; padding: 10px 28px; }
+
+/* Modals */
+.modal-custom .modal-content { border-radius: 16px; border: none; overflow: hidden; }
+.modal-custom .modal-header-custom { padding: 24px 24px 16px; border: none; }
+
+/* Change marker */
+.change-marker {
+  position: relative;
+}
+.change-marker::after {
+  content: 'CHANGED';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4444;
+  color: white;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+.new-marker {
+  position: relative;
+}
+.new-marker::after {
+  content: 'NEW';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #4CAF50;
+  color: white;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Info tooltip */
+.dev-note {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.dev-note i { color: #ffc107; font-size: 18px; margin-top: 2px; }
+
+/* Hidden screens */
+.screen { display: none; }
+.screen.active { display: block; }
+.ins-screen { display: none; }
+.ins-screen.active { display: block; }
+.mgr-screen { display: none; }
+.mgr-screen.active { display: block; }
+
+/* Profile */
+.profile-area { text-align: center; padding: 16px; }
+.profile-area img { width: 64px; height: 64px; border-radius: 50%; background: #ddd; }
+.profile-name { font-size: 14px; margin-top: 8px; }
+.profile-role { font-size: 12px; color: var(--kada-primary); font-weight: 600; }
+
+/* Search bar */
+.search-bar { display: flex; gap: 8px; align-items: center; }
+.search-bar select, .search-bar input { height: 40px; border: 1px solid #ddd; border-radius: 6px; padding: 0 12px; font-size: 14px; }
+
+/* Stat header */
+.stat-header { display: flex; gap: 16px; align-items: center; font-size: 13px; color: var(--kada-gray); }
+.stat-count { font-weight: 600; }
+
+/* Detail info */
+.info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.info-label { width: 120px; font-size: 13px; color: var(--kada-gray); font-weight: 500; }
+.info-value { font-size: 14px; color: #333; }
+
+/* Reason box */
+.reason-box {
+  background: #fff8f0;
+  border: 1px solid var(--kada-warning);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+.reason-box.rejected {
+  background: #fff0f0;
+  border-color: var(--kada-danger);
+}
+
+/* Process diagram */
+.process-diagram {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  margin: 24px 0;
+  text-align: center;
+}
+.process-step-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 24px;
+  border-radius: 12px;
+  min-width: 140px;
+}
+.process-step-box.instructor { background: #e3f2fd; border: 2px solid var(--kada-primary); }
+.process-step-box.manager { background: #f3e5f5; border: 2px solid #9c27b0; }
+.process-step-box.result { border: 2px dashed #ccc; }
+.process-arrow-h { font-size: 24px; color: #999; margin: 0 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<div class="top-nav">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span style="font-size:18px;font-weight:700;">eKADA 프로토타입</span>
+    <span style="font-size:12px;opacity:0.6;">경력증명 발급 프로세스 개선</span>
+  </div>
+  <div class="role-tabs">
+    <button class="role-tab active" onclick="switchRole('overview')">
+      <i class="bi bi-diagram-3"></i> 전체 흐름
+    </button>
+    <button class="role-tab" onclick="switchRole('instructor')">
+      <i class="bi bi-person"></i> 전문강사 화면
+    </button>
+    <button class="role-tab" onclick="switchRole('manager')">
+      <i class="bi bi-shield-check"></i> 교육관리자 화면
+    </button>
+  </div>
+</div>
+
+<!-- ========== OVERVIEW SCREEN ========== -->
+<div id="role-overview" class="screen active">
+  <div style="max-width:1100px;margin:0 auto;padding:32px;">
+    <h2 style="text-align:center;margin-bottom:8px;">경력증명 발급 프로세스 개선안</h2>
+    <p style="text-align:center;color:var(--kada-gray);margin-bottom:32px;">직인 포함 문서의 무분별한 발급 방지를 위해 관리자 승인 프로세스 도입</p>
+
+    <!-- AS-IS vs TO-BE -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="kada-card" style="border-top:4px solid var(--kada-danger);">
+          <h5 style="color:var(--kada-danger);"><i class="bi bi-x-circle"></i> AS-IS (현재)</h5>
+          <div style="display:flex;align-items:center;gap:8px;margin:20px 0;flex-wrap:wrap;">
+            <div class="process-step-box instructor">
+              <i class="bi bi-person" style="font-size:24px;color:var(--kada-primary);"></i>
+              <small style="font-weight:600;">전문강사</small>
+              <small>"발급" 클릭</small>
+            </div>
+            <span class="process-arrow-h">→</span>
+            <div class="process-step-box result" style="background:#ffebee;border-color:var(--kada-danger);">
+              <i class="bi bi-file-earmark-pdf" style="font-size:24px;color:var(--kada-danger);"></i>
+              <small style="font-weight:600;">PDF 즉시 생성</small>
+              <small style="color:var(--kada-danger);">직인 포함!</small>
+            </div>
+          </div>
+          <div class="alert alert-danger py-2 px-3 mb-0" style="font-size:13px;">
+            <i class="bi bi-exclamation-triangle"></i> 문제: 직인 포함 문서를 무제한 즉시 발급 가능
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="kada-card" style="border-top:4px solid var(--kada-success);">
+          <h5 style="color:var(--kada-success);"><i class="bi bi-check-circle"></i> TO-BE (개선)</h5>
+          <div style="display:flex;align-items:center;gap:8px;margin:20px 0;flex-wrap:wrap;">
+            <div class="process-step-box instructor">
+              <i class="bi bi-person" style="font-size:24px;color:var(--kada-primary);"></i>
+              <small style="font-weight:600;">전문강사</small>
+              <small>"신청" 클릭</small>
+            </div>
+            <span class="process-arrow-h">→</span>
+            <div class="process-step-box manager">
+              <i class="bi bi-shield-check" style="font-size:24px;color:#9c27b0;"></i>
+              <small style="font-weight:600;">교육관리자</small>
+              <small>승인/반려/거절</small>
+            </div>
+            <span class="process-arrow-h">→</span>
+            <div class="process-step-box result" style="background:#e8f5e9;border-color:var(--kada-success);">
+              <i class="bi bi-file-earmark-pdf" style="font-size:24px;color:var(--kada-success);"></i>
+              <small style="font-weight:600;">승인 시 PDF 생성</small>
+              <small style="color:var(--kada-success);">직인 포함</small>
+            </div>
+          </div>
+          <div class="alert alert-success py-2 px-3 mb-0" style="font-size:13px;">
+            <i class="bi bi-check-circle"></i> 해결: 관리자 검토 후에만 직인 포함 문서 발급
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Flow Diagram -->
+    <div class="kada-card">
+      <h5><i class="bi bi-diagram-3"></i> 상세 프로세스 흐름도</h5>
+      <div style="overflow-x:auto;padding:24px 0;">
+        <div style="display:flex;align-items:flex-start;gap:0;min-width:900px;justify-content:center;">
+          <!-- Step 1 -->
+          <div style="text-align:center;min-width:160px;">
+            <div style="background:#e3f2fd;border:2px solid var(--kada-primary);border-radius:12px;padding:16px;">
+              <div style="font-size:28px;">👨‍🏫</div>
+              <div style="font-weight:700;margin:4px 0;">전문강사</div>
+              <div style="font-size:12px;color:var(--kada-gray);">증명 신청</div>
+            </div>
+            <div style="font-size:11px;color:var(--kada-gray);margin-top:8px;">증명종류, 언어, 용도 선택<br>→ "신청" 클릭</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:20px 0;font-size:28px;color:#ccc;">→</div>
+          <!-- Step 2 -->
+          <div style="text-align:center;min-width:160px;">
+            <div style="background:#fff8e1;border:2px solid #ffc107;border-radius:12px;padding:16px;">
+              <div style="font-size:28px;">⏳</div>
+              <div style="font-weight:700;margin:4px 0;">대기</div>
+              <div style="font-size:12px;color:var(--kada-gray);">status: pending</div>
+            </div>
+            <div style="font-size:11px;color:var(--kada-gray);margin-top:8px;">PDF 미생성<br>관리자 검토 대기</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:20px 0;font-size:28px;color:#ccc;">→</div>
+          <!-- Step 3 -->
+          <div style="text-align:center;min-width:160px;">
+            <div style="background:#f3e5f5;border:2px solid #9c27b0;border-radius:12px;padding:16px;">
+              <div style="font-size:28px;">👨‍💼</div>
+              <div style="font-weight:700;margin:4px 0;">교육관리자</div>
+              <div style="font-size:12px;color:var(--kada-gray);">내용 확인 & 결정</div>
+            </div>
+            <div style="font-size:11px;color:var(--kada-gray);margin-top:8px;">신청자 정보 확인<br>증명 내용 검토</div>
+          </div>
+          <div style="display:flex;align-items:center;padding:20px 0;font-size:28px;color:#ccc;">→</div>
+          <!-- Step 4: Results -->
+          <div style="min-width:220px;">
+            <!-- Approved -->
+            <div style="background:#e8f5e9;border:2px solid var(--kada-success);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center;">
+              <span style="font-weight:700;color:var(--kada-success);">✅ 승인</span>
+              <span style="font-size:12px;color:var(--kada-gray);"> → PDF 생성(직인), 다운로드 가능</span>
+            </div>
+            <!-- Retry -->
+            <div style="background:#fff8e1;border:2px solid var(--kada-warning);border-radius:12px;padding:12px;margin-bottom:8px;text-align:center;">
+              <span style="font-weight:700;color:var(--kada-warning);">🔄 반려</span>
+              <span style="font-size:12px;color:var(--kada-gray);"> → 사유 전달, 재신청 가능</span>
+            </div>
+            <!-- Rejected -->
+            <div style="background:#ffebee;border:2px solid var(--kada-danger);border-radius:12px;padding:12px;text-align:center;">
+              <span style="font-weight:700;color:var(--kada-danger);">❌ 거절</span>
+              <span style="font-size:12px;color:var(--kada-gray);"> → 사유 전달, 재신청 불가</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dev Summary -->
+    <div class="kada-card">
+      <h5><i class="bi bi-code-slash"></i> 개발 변경사항 요약</h5>
+      <div class="row g-3 mt-2">
+        <div class="col-md-4">
+          <div style="background:#f8f9fa;border-radius:8px;padding:16px;">
+            <h6><i class="bi bi-database" style="color:var(--kada-primary);"></i> DB 모델</h6>
+            <ul style="font-size:13px;margin:0;padding-left:16px;">
+              <li><code>status</code> 필드 추가 (pending/approved/rejected/retry)</li>
+              <li><code>reason</code> 반려/거절 사유</li>
+              <li><code>reviewed_at</code> 처리일시</li>
+              <li><code>reviewed_by</code> 처리자</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div style="background:#f8f9fa;border-radius:8px;padding:16px;">
+            <h6><i class="bi bi-person" style="color:var(--kada-primary);"></i> 전문강사 측</h6>
+            <ul style="font-size:13px;margin:0;padding-left:16px;">
+              <li>"발급"→"신청" 버튼 변경</li>
+              <li>상태 뱃지 표시 (4종)</li>
+              <li>반려 시 재신청 기능</li>
+              <li>승인 전 PDF 다운로드 차단</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div style="background:#f8f9fa;border-radius:8px;padding:16px;">
+            <h6><i class="bi bi-shield-check" style="color:#9c27b0;"></i> 교육관리자 측</h6>
+            <ul style="font-size:13px;margin:0;padding-left:16px;">
+              <li>게시판 관리 > 경력확인서 탭 추가</li>
+              <li>신청 목록/상세 페이지</li>
+              <li>승인/반려/거절 모달</li>
+              <li>승인 시 PDF 생성 트리거</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn btn-kada btn-lg" onclick="switchRole('instructor')" style="margin-right:12px;">
+        <i class="bi bi-person"></i> 전문강사 화면 보기 →
+      </button>
+      <button class="btn btn-lg" onclick="switchRole('manager')" style="background:#9c27b0;color:white;border:none;border-radius:24px;padding:10px 28px;font-weight:600;">
+        <i class="bi bi-shield-check"></i> 교육관리자 화면 보기 →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== INSTRUCTOR SCREENS ========== -->
+<div id="role-instructor" class="screen">
+  <div class="flow-bar">
+    <span style="font-size:13px;font-weight:600;color:var(--kada-primary);">전문강사 화면</span>
+    <span style="color:#ddd;">|</span>
+    <div class="flow-step active" id="ins-flow-1" onclick="showInstructorScreen('list')">① 목록</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step" id="ins-flow-2" onclick="showInstructorScreen('create')">② 신청</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step" id="ins-flow-3" onclick="showInstructorScreen('detail-pending')">③ 대기</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step" id="ins-flow-4" onclick="showInstructorScreen('detail-approved')">④ 승인</div>
+    <span class="flow-arrow">/</span>
+    <div class="flow-step" id="ins-flow-5" onclick="showInstructorScreen('detail-retry')">⑤ 반려</div>
+    <span class="flow-arrow">/</span>
+    <div class="flow-step" id="ins-flow-6" onclick="showInstructorScreen('detail-rejected')">⑥ 거절</div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="profile-area">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+          <span style="color:white;font-size:24px;">한</span>
+        </div>
+        <div class="profile-name" style="margin-top:8px;">한정환</div>
+        <div class="profile-role">전문강사</div>
+      </div>
+      <hr style="margin:8px 16px;">
+      <div class="sidebar-item"><i class="bi bi-house"></i> 홈</div>
+      <div class="sidebar-item"><i class="bi bi-megaphone"></i> 게시판</div>
+      <div class="sidebar-item"><i class="bi bi-book"></i> 교육 활동</div>
+      <div class="sidebar-item"><i class="bi bi-mortarboard"></i> 전문강사 역량강화 교육</div>
+      <div class="sidebar-item active"><i class="bi bi-file-earmark-text"></i> 증명발급</div>
+    </div>
+
+    <div class="content">
+      <!-- Instructor: List -->
+      <div id="ins-list" class="ins-screen active">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>개발 포인트:</strong> "새 증명발급" → <strong>"새 증명 신청"</strong>으로 변경, 상태 컬럼에 4종 뱃지 표시, 승인 건만 PDF 열람 가능</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h4 style="font-weight:700;margin:0;">증명발급</h4>
+          <button class="btn btn-kada change-marker" onclick="showInstructorScreen('create')">새 증명 신청</button>
+        </div>
+        <div class="kada-card">
+          <div class="search-bar mb-3">
+            <input type="text" placeholder="발급일" style="width:200px;">
+            <input type="text" placeholder="문서명/문서고유번호" style="width:200px;">
+            <select class="new-marker" style="width:140px;">
+              <option>상태 전체</option>
+              <option>대기</option>
+              <option>승인</option>
+              <option>반려</option>
+              <option>거절</option>
+            </select>
+            <button class="btn btn-outline-primary btn-sm">검색</button>
+          </div>
+          <table class="kada-table">
+            <thead>
+              <tr>
+                <th>문서고유번호</th>
+                <th>문서명</th>
+                <th>발급일 ⇅</th>
+                <th class="change-marker">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="showInstructorScreen('detail-pending')">
+                <td>KADA-2026-0412</td>
+                <td>도핑방지교육 전문강사 확인서</td>
+                <td>2026.04.12.(토)</td>
+                <td><span class="badge rounded-pill badge-pending px-3 py-1">대기</span></td>
+              </tr>
+              <tr onclick="showInstructorScreen('detail-approved')">
+                <td>KADA-2026-0409</td>
+                <td>도핑방지교육 전문강사 확인서</td>
+                <td>2026.04.09.(목)</td>
+                <td><span class="badge rounded-pill badge-approved px-3 py-1">승인</span></td>
+              </tr>
+              <tr onclick="showInstructorScreen('detail-retry')">
+                <td>KADA-2026-0401</td>
+                <td>도핑방지교육 전문강사 확인서</td>
+                <td>2026.04.01.(화)</td>
+                <td><span class="badge rounded-pill badge-retry px-3 py-1">반려</span></td>
+              </tr>
+              <tr onclick="showInstructorScreen('detail-rejected')">
+                <td>KADA-2026-0328</td>
+                <td>도핑방지교육 전문강사 확인서</td>
+                <td>2026.03.28.(금)</td>
+                <td><span class="badge rounded-pill badge-rejected px-3 py-1">거절</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Instructor: Create -->
+      <div id="ins-create" class="ins-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>개발 포인트:</strong> "발급" 버튼 → <strong>"신청"</strong>으로 변경. 클릭 시 <strong>PDF 생성 없이</strong> Certification 레코드만 생성(status='pending')</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">증명발급</h4>
+        <div class="kada-card">
+          <div class="row">
+            <div class="col-md-7">
+              <h5 style="font-weight:700;">신청자 정보 <small class="text-primary" style="cursor:pointer;">정보 수정</small></h5>
+              <div class="info-row"><div class="info-label">이름</div><div class="info-value">한정환</div></div>
+              <div class="info-row"><div class="info-label">생년월일</div><div class="info-value">1987.08.24</div></div>
+              <div class="info-row"><div class="info-label">연락처</div><div class="info-value">010-6231-0046</div></div>
+              <div class="info-row"><div class="info-label">이메일</div><div class="info-value">han@kada.or.kr</div></div>
+              <div class="info-row"><div class="info-label">주소</div><div class="info-value">경기 성남시 수정구 위례서일로 46</div></div>
+              <p class="text-danger mt-3" style="font-size:13px;">*사실과 다른 정보가 있을 시, 반드시 수정 후 증명서 발급 바랍니다.</p>
+            </div>
+            <div class="col-md-5">
+              <h5 style="font-weight:700;">발급 구분</h5>
+              <div class="mb-3">
+                <label class="form-label" style="font-size:13px;">증명 종류</label>
+                <select class="form-select">
+                  <option>전문강사 확인서</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" style="font-size:13px;">국문/영문</label>
+                <div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" checked>
+                    <label class="form-check-label">국문</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio">
+                    <label class="form-check-label">영문</label>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" style="font-size:13px;">발급용도</label>
+                <select class="form-select"><option>서류제출용</option></select>
+              </div>
+              <div style="text-align:right;margin-top:24px;">
+                <button class="btn btn-outline-secondary me-2" onclick="showInstructorScreen('list')">취소</button>
+                <button class="btn btn-kada change-marker" onclick="showInstructorScreen('detail-pending');alert('증명서 발급이 신청되었습니다.\n관리자 승인 후 발급됩니다.')">신청</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor: Detail - Pending -->
+      <div id="ins-detail-pending" class="ins-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>대기 상태:</strong> PDF 다운로드 버튼 비활성화. "관리자 승인 대기 중" 안내 표시</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">증명발급 상세</h4>
+        <div class="kada-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <span class="badge rounded-pill badge-pending px-3 py-2" style="font-size:14px;">대기</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+          <div class="alert alert-warning" style="font-size:14px;">
+            <i class="bi bi-hourglass-split"></i> 관리자 승인 대기 중입니다. 승인 후 증명서를 다운로드할 수 있습니다.
+          </div>
+          <div class="info-row"><div class="info-label">문서번호</div><div class="info-value">KADA-2026-0412</div></div>
+          <div class="info-row"><div class="info-label">증명 종류</div><div class="info-value">전문강사 확인서</div></div>
+          <div class="info-row"><div class="info-label">국문/영문</div><div class="info-value">국문</div></div>
+          <div class="info-row"><div class="info-label">발급용도</div><div class="info-value">서류제출용</div></div>
+          <div class="info-row"><div class="info-label">신청일</div><div class="info-value">2026.04.12.(토) 10:33</div></div>
+          <div style="text-align:right;margin-top:24px;">
+            <button class="btn btn-outline-secondary" disabled><i class="bi bi-download"></i> PDF 다운로드</button>
+            <button class="btn btn-outline-secondary ms-2" onclick="showInstructorScreen('list')">목록</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor: Detail - Approved -->
+      <div id="ins-detail-approved" class="ins-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>승인 상태:</strong> PDF 다운로드/미리보기 활성화. 관리자 승인 시 PDF가 생성됨</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">증명발급 상세</h4>
+        <div class="kada-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <span class="badge rounded-pill badge-approved px-3 py-2" style="font-size:14px;">승인</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+          <div class="alert alert-success" style="font-size:14px;">
+            <i class="bi bi-check-circle"></i> 승인 완료되었습니다. 아래에서 증명서를 다운로드하세요.
+          </div>
+          <div class="info-row"><div class="info-label">문서번호</div><div class="info-value">KADA-2026-0409</div></div>
+          <div class="info-row"><div class="info-label">증명 종류</div><div class="info-value">전문강사 확인서</div></div>
+          <div class="info-row"><div class="info-label">국문/영문</div><div class="info-value">국문</div></div>
+          <div class="info-row"><div class="info-label">발급용도</div><div class="info-value">서류제출용</div></div>
+          <div class="info-row"><div class="info-label">신청일</div><div class="info-value">2026.04.09.(목) 10:33</div></div>
+          <div class="info-row"><div class="info-label">승인일</div><div class="info-value">2026.04.09.(목) 14:20</div></div>
+          <div style="text-align:right;margin-top:24px;">
+            <button class="btn btn-kada"><i class="bi bi-download"></i> PDF 다운로드</button>
+            <button class="btn btn-outline-primary ms-2"><i class="bi bi-eye"></i> 미리보기</button>
+            <button class="btn btn-outline-secondary ms-2" onclick="showInstructorScreen('list')">목록</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor: Detail - Retry -->
+      <div id="ins-detail-retry" class="ins-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>반려 상태:</strong> 반려 사유 표시 + <strong>"재신청" 버튼</strong> 활성화. 재신청 시 새 Certification 레코드 생성</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">증명발급 상세</h4>
+        <div class="kada-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <span class="badge rounded-pill badge-retry px-3 py-2" style="font-size:14px;">반려</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+          <div class="reason-box">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--kada-warning);"><i class="bi bi-exclamation-circle"></i> 반려 사유</div>
+            <div style="font-size:14px;">주소 정보가 최신 정보와 다릅니다. 개인정보 수정 후 재신청 바랍니다.</div>
+          </div>
+          <div class="info-row"><div class="info-label">문서번호</div><div class="info-value">KADA-2026-0401</div></div>
+          <div class="info-row"><div class="info-label">증명 종류</div><div class="info-value">전문강사 확인서</div></div>
+          <div class="info-row"><div class="info-label">신청일</div><div class="info-value">2026.04.01.(화) 09:15</div></div>
+          <div class="info-row"><div class="info-label">반려일</div><div class="info-value">2026.04.01.(화) 15:40</div></div>
+          <div style="text-align:right;margin-top:24px;">
+            <button class="btn btn-kada new-marker" onclick="showInstructorScreen('create')"><i class="bi bi-arrow-repeat"></i> 재신청</button>
+            <button class="btn btn-outline-secondary ms-2" onclick="showInstructorScreen('list')">목록</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructor: Detail - Rejected -->
+      <div id="ins-detail-rejected" class="ins-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>거절 상태:</strong> 거절 사유 표시. 재신청 버튼 없음 (재신청 불가)</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">증명발급 상세</h4>
+        <div class="kada-card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <span class="badge rounded-pill badge-rejected px-3 py-2" style="font-size:14px;">거절</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+          <div class="reason-box rejected">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--kada-danger);"><i class="bi bi-x-circle"></i> 거절 사유</div>
+            <div style="font-size:14px;">해당 교육 이수 기록이 확인되지 않습니다. 교육 이수 후 다시 신청해주세요.</div>
+          </div>
+          <div class="info-row"><div class="info-label">문서번호</div><div class="info-value">KADA-2026-0328</div></div>
+          <div class="info-row"><div class="info-label">증명 종류</div><div class="info-value">전문강사 확인서</div></div>
+          <div class="info-row"><div class="info-label">신청일</div><div class="info-value">2026.03.28.(금) 11:00</div></div>
+          <div class="info-row"><div class="info-label">거절일</div><div class="info-value">2026.03.28.(금) 16:30</div></div>
+          <div style="text-align:right;margin-top:24px;">
+            <button class="btn btn-outline-secondary" onclick="showInstructorScreen('list')">목록</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MANAGER SCREENS ========== -->
+<div id="role-manager" class="screen">
+  <div class="flow-bar">
+    <span style="font-size:13px;font-weight:600;color:#9c27b0;">교육관리자 화면</span>
+    <span style="color:#ddd;">|</span>
+    <div class="flow-step active" id="mgr-flow-1" onclick="showManagerScreen('list')">① 신청 목록</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step" id="mgr-flow-2" onclick="showManagerScreen('detail')">② 상세 확인</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step" id="mgr-flow-3a" onclick="showManagerScreen('modal-approve')">③-a 승인</div>
+    <span class="flow-arrow">/</span>
+    <div class="flow-step" id="mgr-flow-3b" onclick="showManagerScreen('modal-retry')">③-b 반려</div>
+    <span class="flow-arrow">/</span>
+    <div class="flow-step" id="mgr-flow-3c" onclick="showManagerScreen('modal-reject')">③-c 거절</div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar" style="background:#2c2c3e;">
+      <div class="profile-area">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#9c27b0,#e040fb);margin:0 auto;display:flex;align-items:center;justify-content:center;">
+          <span style="color:white;font-size:24px;">관</span>
+        </div>
+        <div class="profile-name" style="color:white;margin-top:8px;">교육관리자</div>
+        <div style="font-size:12px;color:#e040fb;font-weight:600;">관리자</div>
+      </div>
+      <hr style="margin:8px 16px;border-color:#444;">
+      <div class="sidebar-item" style="color:#aaa;"><i class="bi bi-speedometer2"></i> 대시보드</div>
+      <div class="sidebar-item" style="color:#aaa;"><i class="bi bi-people"></i> 전문강사 관리</div>
+      <div class="sidebar-item" style="color:#aaa;"><i class="bi bi-calendar-check"></i> 교육 관리</div>
+      <div class="sidebar-item" style="color:white;font-weight:600;background:rgba(156,39,176,0.3);"><i class="bi bi-journal-text"></i> 게시판 관리</div>
+      <div class="sidebar-item new-marker" style="color:#e040fb;padding-left:40px;font-size:13px;">→ 전문강사 경력 확인서</div>
+      <div class="sidebar-item" style="color:#aaa;padding-left:40px;font-size:13px;">→ 외부교육 수강 인증</div>
+    </div>
+
+    <div class="content">
+      <!-- Manager: List -->
+      <div id="mgr-list" class="mgr-screen active">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>개발 포인트:</strong> 기존 <code>manager-instructors-certification.html</code> 템플릿 패턴 복사. 쿼리셋: <code>Certification.objects.filter(type_id='instructor')</code></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <h4 style="font-weight:700;margin:0;">전문강사 경력 확인서</h4>
+            <div class="stat-header">
+              전체 <span class="stat-count">156</span> |
+              대기 <span class="badge rounded-pill badge-pending" style="font-size:11px;">3</span>
+              승인 <span class="badge rounded-pill badge-approved" style="font-size:11px;">105</span>
+              반려 <span class="badge rounded-pill badge-retry" style="font-size:11px;">2</span>
+              거절 <span class="badge rounded-pill badge-rejected" style="font-size:11px;">46</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kada-card">
+          <div class="search-bar mb-3">
+            <select style="width:140px;">
+              <option>상태 전체</option>
+              <option>대기</option>
+              <option>승인</option>
+              <option>반려</option>
+              <option>거절</option>
+            </select>
+            <input type="text" placeholder="신청자명 검색" style="width:180px;">
+            <input type="text" placeholder="문서명/문서번호" style="width:180px;">
+            <button class="btn btn-outline-primary btn-sm">검색</button>
+          </div>
+
+          <table class="kada-table">
+            <thead>
+              <tr>
+                <th style="width:10%;">상태</th>
+                <th style="width:18%;">문서번호</th>
+                <th style="width:30%;">증명종류</th>
+                <th style="width:15%;">신청자</th>
+                <th style="width:15%;">신청일</th>
+                <th style="width:12%;">처리일</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="showManagerScreen('detail')" style="background:#fffbf0;">
+                <td><span class="badge rounded-pill badge-pending px-3 py-1">대기</span></td>
+                <td>KADA-2026-0412</td>
+                <td>전문강사 확인서</td>
+                <td><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:24px;height:24px;border-radius:50%;background:#667eea;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;">한</span> 한정환</span></td>
+                <td>2026.04.12.</td>
+                <td>-</td>
+              </tr>
+              <tr onclick="showManagerScreen('detail')">
+                <td><span class="badge rounded-pill badge-pending px-3 py-1">대기</span></td>
+                <td>KADA-2026-0411</td>
+                <td>전문강사 확인서</td>
+                <td><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:24px;height:24px;border-radius:50%;background:#e040fb;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;">김</span> 김도영</span></td>
+                <td>2026.04.11.</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td><span class="badge rounded-pill badge-approved px-3 py-1">승인</span></td>
+                <td>KADA-2026-0409</td>
+                <td>전문강사 확인서</td>
+                <td><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:24px;height:24px;border-radius:50%;background:#667eea;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;">한</span> 한정환</span></td>
+                <td>2026.04.09.</td>
+                <td>2026.04.09.</td>
+              </tr>
+              <tr>
+                <td><span class="badge rounded-pill badge-retry px-3 py-1">반려</span></td>
+                <td>KADA-2026-0401</td>
+                <td>전문강사 확인서</td>
+                <td><span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:24px;height:24px;border-radius:50%;background:#667eea;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:11px;">한</span> 한정환</span></td>
+                <td>2026.04.01.</td>
+                <td>2026.04.01.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Manager: Detail (pending) -->
+      <div id="mgr-detail" class="mgr-screen">
+        <div class="dev-note">
+          <i class="bi bi-info-circle-fill"></i>
+          <div><strong>개발 포인트:</strong> 기존 <code>manager-instructors-certification-detail.html</code> 모달 패턴 그대로 사용. 승인 시 <code>generate_certification_pdf()</code> 호출</div>
+        </div>
+        <h4 style="font-weight:700;margin-bottom:16px;">전문강사 경력 확인서 상세</h4>
+
+        <div class="kada-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="badge rounded-pill badge-pending px-3 py-2" style="font-size:14px;">대기</span>
+              <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+            </div>
+          </div>
+          <hr>
+
+          <h6 style="font-weight:700;margin-top:16px;"><i class="bi bi-person"></i> 신청자 정보</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="info-row"><div class="info-label">이름</div><div class="info-value">한정환</div></div>
+              <div class="info-row"><div class="info-label">생년월일</div><div class="info-value">1987.08.24</div></div>
+              <div class="info-row"><div class="info-label">연락처</div><div class="info-value">010-6231-0046</div></div>
+            </div>
+            <div class="col-md-6">
+              <div class="info-row"><div class="info-label">이메일</div><div class="info-value">han@kada.or.kr</div></div>
+              <div class="info-row"><div class="info-label">주소</div><div class="info-value">경기 성남시 수정구 위례서일로 46</div></div>
+              <div class="info-row"><div class="info-label">경력기간</div><div class="info-value">1년 11개월 (2024.05.28~)</div></div>
+            </div>
+          </div>
+
+          <h6 style="font-weight:700;margin-top:24px;"><i class="bi bi-file-earmark-text"></i> 발급 정보</h6>
+          <div class="row">
+            <div class="col-md-4"><div class="info-row"><div class="info-label">문서번호</div><div class="info-value">KADA-2026-0412</div></div></div>
+            <div class="col-md-4"><div class="info-row"><div class="info-label">증명종류</div><div class="info-value">전문강사 확인서</div></div></div>
+            <div class="col-md-4"><div class="info-row"><div class="info-label">국문/영문</div><div class="info-value">국문</div></div></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4"><div class="info-row"><div class="info-label">발급용도</div><div class="info-value">서류제출용</div></div></div>
+            <div class="col-md-4"><div class="info-row"><div class="info-label">신청일</div><div class="info-value">2026.04.12.(토) 10:33</div></div></div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:24px;">
+            <button class="btn btn-reject-action" onclick="showManagerScreen('modal-reject')">거절</button>
+            <button class="btn btn-retry-action" onclick="showManagerScreen('modal-retry')">반려</button>
+            <button class="btn btn-approve" onclick="showManagerScreen('modal-approve')">승인</button>
+          </div>
+        </div>
+        <button class="btn btn-outline-secondary" onclick="showManagerScreen('list')">목록</button>
+      </div>
+
+      <!-- Manager: Approve Modal -->
+      <div id="mgr-modal-approve" class="mgr-screen">
+        <h4 style="font-weight:700;margin-bottom:16px;">전문강사 경력 확인서 상세</h4>
+        <div class="kada-card" style="opacity:0.3;pointer-events:none;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="badge rounded-pill badge-pending px-3 py-2">대기</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+          <p style="margin-top:16px;">신청자 정보 ...</p>
+        </div>
+
+        <!-- Modal overlay -->
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;" onclick="showManagerScreen('detail')">
+          <div style="background:white;border-radius:16px;width:380px;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.15);" onclick="event.stopPropagation()">
+            <div style="text-align:center;padding:32px 24px;">
+              <h6 style="color:var(--kada-primary);font-weight:700;margin-bottom:16px;">알림</h6>
+              <p style="margin:0;font-size:14px;">해당 요청을 승인합니다.</p>
+              <p style="margin:4px 0 0;font-size:14px;">승인 후에는 <strong>상태 변경이 불가</strong>합니다.</p>
+              <div class="dev-note mt-3" style="text-align:left;margin-bottom:0;">
+                <i class="bi bi-info-circle-fill"></i>
+                <div style="font-size:12px;"><strong>승인 시 서버 동작:</strong><br>1. status → 'approved'<br>2. <code>generate_certification_pdf()</code> 호출 → PDF 생성(직인 포함)<br>3. reviewed_at, reviewed_by 저장</div>
+              </div>
+            </div>
+            <div style="display:flex;border-top:1px solid #e9ecef;">
+              <button style="flex:1;padding:14px;border:none;background:white;color:#6c757d;" onclick="showManagerScreen('detail')">취소</button>
+              <button style="flex:1;padding:14px;border:none;background:var(--kada-primary);color:white;border-left:1px solid #e9ecef;" onclick="showManagerScreen('list');alert('승인되었습니다.\nPDF가 생성되었습니다.')">확인했습니다</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manager: Retry Modal -->
+      <div id="mgr-modal-retry" class="mgr-screen">
+        <h4 style="font-weight:700;margin-bottom:16px;">전문강사 경력 확인서 상세</h4>
+        <div class="kada-card" style="opacity:0.3;pointer-events:none;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="badge rounded-pill badge-pending px-3 py-2">대기</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+        </div>
+
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;" onclick="showManagerScreen('detail')">
+          <div style="background:white;border-radius:10px;width:360px;overflow:hidden;" onclick="event.stopPropagation()">
+            <div style="padding:24px;">
+              <div style="font-size:16px;font-weight:700;">반려(재제출 가능)</div>
+              <textarea style="width:100%;margin-top:12px;border:1px solid #ddd;border-radius:6px;padding:12px;resize:none;font-size:14px;" rows="4" placeholder="반려 사유를 입력해 주세요.">주소 정보가 최신 정보와 다릅니다. 개인정보 수정 후 재신청 바랍니다.</textarea>
+              <p style="font-size:13px;margin:8px 0 0;">해당 요청을 <strong>반려</strong>합니다. 반려 후에는 <strong>상태 변경이 불가</strong>하며, 제출자에게 반려 사유가 전달됩니다.</p>
+            </div>
+            <div style="display:flex;">
+              <button style="flex:1;padding:12px;border:none;background:white;color:var(--kada-warning);border-top:1px solid var(--kada-warning);" onclick="showManagerScreen('detail')">취소</button>
+              <button style="flex:1;padding:12px;border:none;background:var(--kada-warning);color:white;" onclick="showManagerScreen('list');alert('반려되었습니다.\n제출자에게 사유가 전달됩니다.')">확인</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manager: Reject Modal -->
+      <div id="mgr-modal-reject" class="mgr-screen">
+        <h4 style="font-weight:700;margin-bottom:16px;">전문강사 경력 확인서 상세</h4>
+        <div class="kada-card" style="opacity:0.3;pointer-events:none;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="badge rounded-pill badge-pending px-3 py-2">대기</span>
+            <span style="font-size:18px;font-weight:700;">도핑방지교육 전문강사 확인서</span>
+          </div>
+        </div>
+
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;" onclick="showManagerScreen('detail')">
+          <div style="background:white;border-radius:10px;width:360px;overflow:hidden;" onclick="event.stopPropagation()">
+            <div style="padding:24px;">
+              <div style="font-size:16px;font-weight:700;">거절(재제출 불가)</div>
+              <textarea style="width:100%;margin-top:12px;border:1px solid #ddd;border-radius:6px;padding:12px;resize:none;font-size:14px;" rows="4" placeholder="거절 사유를 입력해 주세요.">해당 교육 이수 기록이 확인되지 않습니다.</textarea>
+              <p style="font-size:13px;margin:8px 0 0;">해당 요청을 <strong>거절</strong>합니다. 거절 후에는 <strong>상태 변경이 불가</strong>하며, 제출자에게 거절 사유가 전달됩니다.</p>
+            </div>
+            <div style="display:flex;">
+              <button style="flex:1;padding:12px;border:none;background:white;color:var(--kada-danger);border-top:1px solid var(--kada-danger);" onclick="showManagerScreen('detail')">취소</button>
+              <button style="flex:1;padding:12px;border:none;background:var(--kada-danger);color:white;" onclick="showManagerScreen('list');alert('거절되었습니다.\n제출자에게 사유가 전달됩니다.')">확인</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchRole(role) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('role-' + role).classList.add('active');
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.role-tab[onclick*="' + role + '"]')?.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showInstructorScreen(screen) {
+  document.querySelectorAll('.ins-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('ins-' + screen).classList.add('active');
+  // Update flow
+  const flowMap = { 'list':'1', 'create':'2', 'detail-pending':'3', 'detail-approved':'4', 'detail-retry':'5', 'detail-rejected':'6' };
+  document.querySelectorAll('[id^="ins-flow-"]').forEach(f => f.classList.remove('active','done'));
+  const n = parseInt(flowMap[screen]);
+  for (let i = 1; i < n; i++) document.getElementById('ins-flow-' + i).classList.add('done');
+  document.getElementById('ins-flow-' + n).classList.add('active');
+}
+
+function showManagerScreen(screen) {
+  document.querySelectorAll('.mgr-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('mgr-' + screen).classList.add('active');
+  const flowMap = { 'list':'1', 'detail':'2', 'modal-approve':'3a', 'modal-retry':'3b', 'modal-reject':'3c' };
+  document.querySelectorAll('[id^="mgr-flow-"]').forEach(f => f.classList.remove('active','done'));
+  const id = flowMap[screen];
+  document.getElementById('mgr-flow-' + id)?.classList.add('active');
+  if (['3a','3b','3c'].includes(id)) {
+    document.getElementById('mgr-flow-1').classList.add('done');
+    document.getElementById('mgr-flow-2').classList.add('done');
+  } else if (id === '2') {
+    document.getElementById('mgr-flow-1').classList.add('done');
+  }
+}
+</script>
+</body>
+</html>
