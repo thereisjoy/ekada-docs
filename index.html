@@ -353,13 +353,13 @@ body { background: var(--kada-bg); margin: 0; }
                     <div style="display:flex;gap:12px;flex-wrap:wrap;">
 
                       <!-- 온라인교육 요약 -->
-                      <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+                      <div onclick="toggleDetail('online-detail')" style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                           <div style="display:flex;align-items:center;gap:6px;">
                             <span style="background:#f0fdf4;color:#16a34a;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-laptop"></i></span>
                             <span style="font-size:13px;font-weight:700;color:#333;">온라인 교육</span>
                           </div>
-                          <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
+                          <span id="online-detail-arrow" style="font-size:11px;color:var(--kada-primary);">자세히 ▼</span>
                         </div>
                         <div style="display:flex;gap:16px;">
                           <div><div style="font-size:10px;color:#999;">수료</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
@@ -368,13 +368,13 @@ body { background: var(--kada-bg); margin: 0; }
                       </div>
 
                       <!-- 인지도조사 요약 -->
-                      <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+                      <div onclick="toggleDetail('survey-detail')" style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                           <div style="display:flex;align-items:center;gap:6px;">
                             <span style="background:#eff6ff;color:#2563eb;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-clipboard-data"></i></span>
                             <span style="font-size:13px;font-weight:700;color:#333;">인지도 조사</span>
                           </div>
-                          <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
+                          <span id="survey-detail-arrow" style="font-size:11px;color:var(--kada-primary);">자세히 ▼</span>
                         </div>
                         <div style="display:flex;gap:16px;">
                           <div><div style="font-size:10px;color:#999;">응답</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
@@ -383,14 +383,121 @@ body { background: var(--kada-bg); margin: 0; }
                         </div>
                       </div>
                     </div>
+
+                    <!-- 온라인교육 상세 (접힘) -->
+                    <div id="online-detail" style="display:none;margin-top:16px;">
+                      <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#0f766e,#14b8a6);padding:16px 20px;color:white;">
+                          <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="font-size:15px;font-weight:800;">온라인 교육 현황</div>
+                            <div style="display:flex;gap:6px;">
+                              <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;"><i class="bi bi-download"></i> 엑셀 내보내기</button>
+                              <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;"><i class="bi bi-bar-chart-line"></i> 인포그래픽</button>
+                            </div>
+                          </div>
+                          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">수강 신청</div><div style="font-size:22px;font-weight:800;">52,847</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">수료 완료</div><div style="font-size:22px;font-weight:800;">41,254</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">수료율</div><div style="font-size:22px;font-weight:800;color:#bbf7d0;">78.1%</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">평균 수강시간</div><div style="font-size:22px;font-weight:800;color:#a7f3d0;">42분</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div style="background:white;padding:16px 20px;">
+                          <div style="font-size:13px;font-weight:700;margin-bottom:10px;">과정별 수료 현황</div>
+                          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                            <thead><tr style="border-bottom:2px solid #e5e7eb;">
+                              <th style="padding:6px;text-align:left;color:#666;">과정명</th>
+                              <th style="padding:6px;text-align:right;color:#666;">수강</th>
+                              <th style="padding:6px;text-align:right;color:#666;">수료</th>
+                              <th style="padding:6px;text-align:right;color:#666;">수료율</th>
+                              <th style="padding:6px;text-align:right;color:#666;">추이</th>
+                            </tr></thead>
+                            <tbody>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">선수 기본교육 (2026)</td><td style="padding:6px;text-align:right;">28,341</td><td style="padding:6px;text-align:right;">22,105</td><td style="padding:6px;text-align:right;font-weight:700;">78.0%</td><td style="padding:6px;text-align:right;color:#16a34a;">△2.1%</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">지도자 교육 (2026)</td><td style="padding:6px;text-align:right;">15,822</td><td style="padding:6px;text-align:right;">12,471</td><td style="padding:6px;text-align:right;font-weight:700;">78.8%</td><td style="padding:6px;text-align:right;color:#16a34a;">△1.3%</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">체육단체 임직원 교육 (2026)</td><td style="padding:6px;text-align:right;">8,684</td><td style="padding:6px;text-align:right;">6,678</td><td style="padding:6px;text-align:right;font-weight:700;">76.9%</td><td style="padding:6px;text-align:right;color:#dc2626;">▽0.5%</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 인지도조사 상세 (접힘) -->
+                    <div id="survey-detail" style="display:none;margin-top:16px;">
+                      <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:16px 20px;color:white;">
+                          <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="font-size:15px;font-weight:800;">2026 도핑방지 인지도 조사</div>
+                            <div style="display:flex;gap:6px;">
+                              <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;"><i class="bi bi-download"></i> 엑셀 내보내기</button>
+                              <button style="background:rgba(255,255,255,0.2);color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;"><i class="bi bi-bar-chart-line"></i> 인포그래픽</button>
+                            </div>
+                          </div>
+                          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">총 응답수</div><div style="font-size:22px;font-weight:800;">41,254</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">2025 종합</div><div style="font-size:22px;font-weight:800;opacity:0.5;">91.6</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">2026 목표</div><div style="font-size:22px;font-weight:800;color:#86efac;">91.5</div>
+                            </div>
+                            <div style="flex:1;min-width:80px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:10px;text-align:center;">
+                              <div style="font-size:10px;opacity:0.7;">2026 실적</div><div style="font-size:22px;font-weight:800;color:#93c5fd;">91.6</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div style="background:white;padding:16px 20px;">
+                          <div style="font-size:13px;font-weight:700;margin-bottom:10px;">조사문항별 결과</div>
+                          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                            <thead><tr style="border-bottom:2px solid #e5e7eb;">
+                              <th style="padding:6px;text-align:left;color:#666;">주요항목</th>
+                              <th style="padding:6px;text-align:center;color:#666;">2024</th>
+                              <th style="padding:6px;text-align:center;color:var(--kada-primary);font-weight:700;">2025</th>
+                              <th style="padding:6px;text-align:center;color:#666;">증감</th>
+                            </tr></thead>
+                            <tbody>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">① 도핑에 대한 인지 여부</td><td style="padding:6px;text-align:center;">87.72</td><td style="padding:6px;text-align:center;font-weight:700;">92.49</td><td style="padding:6px;text-align:center;color:#16a34a;">△4.77</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">② 규정위반 제재 부과 인지</td><td style="padding:6px;text-align:center;">92.81</td><td style="padding:6px;text-align:center;font-weight:700;">91.25</td><td style="padding:6px;text-align:center;color:#dc2626;">▽1.56</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">③ 약물 책임이 선수에게 있음</td><td style="padding:6px;text-align:center;">93.73</td><td style="padding:6px;text-align:center;font-weight:700;">92.50</td><td style="padding:6px;text-align:center;color:#dc2626;">▽1.23</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">④ TUE 제도 인지</td><td style="padding:6px;text-align:center;">87.28</td><td style="padding:6px;text-align:center;font-weight:700;">90.0</td><td style="padding:6px;text-align:center;color:#16a34a;">△2.72</td></tr>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;">⑤ 교육/홍보활동 효과</td><td style="padding:6px;text-align:center;">96.71</td><td style="padding:6px;text-align:center;font-weight:700;">91.75</td><td style="padding:6px;text-align:center;color:#dc2626;">▽4.96</td></tr>
+                              <tr style="background:#f8fafc;font-weight:700;"><td style="padding:6px;">종합</td><td style="padding:6px;text-align:center;">91.45</td><td style="padding:6px;text-align:center;color:var(--kada-primary);">91.6</td><td style="padding:6px;text-align:center;">△0.15</td></tr>
+                            </tbody>
+                          </table>
+
+                          <div style="font-size:13px;font-weight:700;margin:16px 0 10px;">응답자 기본사항</div>
+                          <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                            <thead><tr style="border-bottom:2px solid #e5e7eb;color:#666;">
+                              <th style="padding:6px;text-align:left;">인원 (명)</th><th style="padding:6px;text-align:right;">10대</th><th style="padding:6px;text-align:right;">20대</th><th style="padding:6px;text-align:right;">30대</th><th style="padding:6px;text-align:right;">40대</th><th style="padding:6px;text-align:right;">50대+</th><th style="padding:6px;text-align:right;font-weight:700;">계</th>
+                            </tr></thead>
+                            <tbody>
+                              <tr style="border-bottom:1px solid #f3f4f6;"><td style="padding:6px;font-weight:600;">연령별</td><td style="padding:6px;text-align:right;">12,714</td><td style="padding:6px;text-align:right;">12,737</td><td style="padding:6px;text-align:right;">8,352</td><td style="padding:6px;text-align:right;">5,590</td><td style="padding:6px;text-align:right;">1,861</td><td style="padding:6px;text-align:right;font-weight:700;">41,254</td></tr>
+                              <tr><td style="padding:6px;font-weight:600;">전년도</td><td style="padding:6px;text-align:right;">31,464</td><td style="padding:6px;text-align:right;">4,563</td><td style="padding:6px;text-align:right;">1,051</td><td style="padding:6px;text-align:right;">128</td><td style="padding:6px;text-align:right;">765</td><td style="padding:6px;text-align:right;">38,122</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
 
                 <!-- 개발 가이드 -->
                 <div style="background:#f8f9fa;border-top:1px solid #eee;padding:12px 24px;">
                   <div style="font-size:11px;color:#666;">
-                    <strong>개발 가이드:</strong> 기존 <code>/educations/manager/statistics/</code> 페이지 <strong>하단</strong>에 요약 카드 2개 추가.
-                    기존 대면교육 통계 콘텐츠는 일체 수정하지 않음. "자세히 →" 클릭 시 상세 페이지로 이동.
+                    <strong>개발 가이드:</strong> 기존 통계 페이지 <strong>하단</strong>에 요약 카드 2개 추가.
+                    카드 클릭 시 아코디언 방식으로 상세 펼침. 각 상세에 엑셀 내보내기 + 인포그래픽 버튼 포함.
+                    기존 대면교육 통계 콘텐츠는 일체 수정하지 않음.
                   </div>
                 </div>
               </div>
@@ -821,6 +928,18 @@ function switchStatsTab(tabId, btnEl) {
   });
   btnEl.style.background = 'white';
   btnEl.style.color = '#2a2356';
+}
+/* 통계 카드 아코디언 토글 */
+function toggleDetail(id) {
+  var el = document.getElementById(id);
+  var arrow = document.getElementById(id + '-arrow');
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    if (arrow) arrow.textContent = '접기 ▲';
+  } else {
+    el.style.display = 'none';
+    if (arrow) arrow.textContent = '자세히 ▼';
+  }
 }
 /* securepanel 상세 보기 */
 function showAdminDetail(name) {
