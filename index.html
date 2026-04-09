@@ -339,48 +339,49 @@ body { background: var(--kada-bg); margin: 0; }
                 </div>
 
                 <div style="background:white;padding:20px 24px;">
-
-                  <!-- ★ 신규: 온라인교육 + 인지도조사 요약 카드 -->
-                  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
-
-                    <!-- 온라인교육 요약 -->
-                    <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                          <span style="background:#f0fdf4;color:#16a34a;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-laptop"></i></span>
-                          <span style="font-size:13px;font-weight:700;color:#333;">온라인 교육</span>
-                        </div>
-                        <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
-                      </div>
-                      <div style="display:flex;gap:16px;">
-                        <div><div style="font-size:10px;color:#999;">수료</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
-                        <div><div style="font-size:10px;color:#999;">수료율</div><div style="font-size:20px;font-weight:800;color:#16a34a;">78.1%</div></div>
-                      </div>
-                    </div>
-
-                    <!-- 인지도조사 요약 -->
-                    <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
-                      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                        <div style="display:flex;align-items:center;gap:6px;">
-                          <span style="background:#eff6ff;color:#2563eb;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-clipboard-data"></i></span>
-                          <span style="font-size:13px;font-weight:700;color:#333;">인지도 조사</span>
-                        </div>
-                        <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
-                      </div>
-                      <div style="display:flex;gap:16px;">
-                        <div><div style="font-size:10px;color:#999;">응답</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
-                        <div><div style="font-size:10px;color:#999;">종합점수</div><div style="font-size:20px;font-weight:800;color:#2563eb;">91.6</div></div>
-                        <div><div style="font-size:10px;color:#999;">목표</div><div style="font-size:20px;font-weight:800;color:#16a34a;">91.5 ✓</div></div>
-                      </div>
-                    </div>
-                  </div>
-
                   <!-- 기존 대면교육 통계 영역 (변경 없음) -->
-                  <div style="border-top:1px solid #eee;padding-top:20px;">
+                  <div style="padding-bottom:20px;">
                     <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;color:#999;">
                       <i class="bi bi-bar-chart-line" style="font-size:40px;"></i>
                       <div style="font-size:14px;margin-top:8px;font-weight:600;color:#666;">기존 대면 교육 통계 (변경 없음)</div>
                       <div style="font-size:12px;margin-top:4px;">종목별 교육 현황 · 지역별 교육 현황 · 월별 추이 · 전문강사 활동 현황 등</div>
+                    </div>
+                  </div>
+
+                  <!-- ★ 신규: 하단에 온라인교육 + 인지도조사 요약 카드 -->
+                  <div style="border-top:1px solid #eee;padding-top:20px;">
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+
+                      <!-- 온라인교육 요약 -->
+                      <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                          <div style="display:flex;align-items:center;gap:6px;">
+                            <span style="background:#f0fdf4;color:#16a34a;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-laptop"></i></span>
+                            <span style="font-size:13px;font-weight:700;color:#333;">온라인 교육</span>
+                          </div>
+                          <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
+                        </div>
+                        <div style="display:flex;gap:16px;">
+                          <div><div style="font-size:10px;color:#999;">수료</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
+                          <div><div style="font-size:10px;color:#999;">수료율</div><div style="font-size:20px;font-weight:800;color:#16a34a;">78.1%</div></div>
+                        </div>
+                      </div>
+
+                      <!-- 인지도조사 요약 -->
+                      <div style="flex:1;min-width:200px;background:white;border:1px solid #e5e7eb;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                          <div style="display:flex;align-items:center;gap:6px;">
+                            <span style="background:#eff6ff;color:#2563eb;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;"><i class="bi bi-clipboard-data"></i></span>
+                            <span style="font-size:13px;font-weight:700;color:#333;">인지도 조사</span>
+                          </div>
+                          <span style="font-size:11px;color:var(--kada-primary);cursor:pointer;">자세히 →</span>
+                        </div>
+                        <div style="display:flex;gap:16px;">
+                          <div><div style="font-size:10px;color:#999;">응답</div><div style="font-size:20px;font-weight:800;color:#333;">41,254</div></div>
+                          <div><div style="font-size:10px;color:#999;">종합점수</div><div style="font-size:20px;font-weight:800;color:#2563eb;">91.6</div></div>
+                          <div><div style="font-size:10px;color:#999;">목표</div><div style="font-size:20px;font-weight:800;color:#16a34a;">91.5 ✓</div></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -388,9 +389,8 @@ body { background: var(--kada-bg); margin: 0; }
                 <!-- 개발 가이드 -->
                 <div style="background:#f8f9fa;border-top:1px solid #eee;padding:12px 24px;">
                   <div style="font-size:11px;color:#666;">
-                    <strong>개발 가이드:</strong> 기존 <code>/educations/manager/statistics/</code> 페이지 상단에 요약 카드 2개만 추가.
-                    "자세히 →" 클릭 시 각각의 상세 페이지로 이동 (<code>?view=online</code> / <code>?view=survey</code>).
-                    기존 대면교육 통계 콘텐츠는 일체 수정하지 않음. 카드 데이터는 서버사이드에서 쿼리.
+                    <strong>개발 가이드:</strong> 기존 <code>/educations/manager/statistics/</code> 페이지 <strong>하단</strong>에 요약 카드 2개 추가.
+                    기존 대면교육 통계 콘텐츠는 일체 수정하지 않음. "자세히 →" 클릭 시 상세 페이지로 이동.
                   </div>
                 </div>
               </div>
