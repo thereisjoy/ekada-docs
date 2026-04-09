@@ -144,11 +144,13 @@ body { background: var(--kada-bg); margin: 0; }
         <p style="color:#666;font-size:14px;margin:0;">온라인 교육 수료 후 인지도 조사(5문항, 4점척도) 의무화. 1 아이디 = 1회만 진행.</p>
 
         <div class="mt-3">
-          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 DB 모델 설계 (SurveyResponse: user FK, 응답 JSON, 조사년도)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 DB 모델 설계 (SurveyResponse: user FK, 응답 JSON, 조사년도, unique_together)</div>
           <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 교육 수강 스텝에 "인지도 조사" 단계 추가 (마지막 영상 뒤, 수료 전)</div>
-          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 폼 UI 개발 (5문항 × 4점 척도)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 인지도 조사 폼 UI 개발 (5문항 × 4점 척도 + 상단 유의사항 고정)</div>
           <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 이미 조사 완료한 유저는 자동 스킵 로직 (1 아이디 = 1회)</div>
-          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 관리자 통계 페이지 (연령별/문항별 집계 - 기존 조사결과 포맷)</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> <strong style="color:#c62828;">오류 방어 로직</strong>: 이탈 방지(beforeunload), localStorage 임시저장, 재시도, 중복제출 방지</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> <strong style="color:#c62828;">수료 무결성</strong>: 수료 API에서 인지도 조사 완료 여부 백엔드 이중 체크</div>
+          <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> securepanel 관리자 화면 (응답 목록 + 필터 + 문항별 통계 + 엑셀 다운로드)</div>
         </div>
 
         <!-- 인라인 프로토타입 토글 -->
@@ -167,6 +169,8 @@ body { background: var(--kada-bg); margin: 0; }
               <div class="proto-tab" onclick="showProto('survey',this)">② 인지도 조사 폼</div>
               <div class="proto-tab" onclick="showProto('done',this)">③ 수료 완료</div>
               <div class="proto-tab" onclick="showProto('skip',this)">④ 이미 완료 시 스킵</div>
+              <div class="proto-tab" onclick="showProto('admin',this)" style="background:#2c2c3e;color:#aaa;border-color:#444;">🔧 securepanel 관리</div>
+              <div class="proto-tab" onclick="showProto('errors',this)" style="background:#ffebee;color:#c62828;border-color:#ef9a9a;">⚠️ 오류 처리 가이드</div>
             </div>
 
             <!-- 전체 흐름 -->
@@ -311,6 +315,226 @@ body { background: var(--kada-bg); margin: 0; }
                 </div>
                 <div style="background:#f8f9fa;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#555;">
                   <strong>개발 로직:</strong> <code>SurveyResponse.objects.filter(user=request.user, year=2026).exists()</code> → True이면 자동 스킵
+                </div>
+              </div>
+            </div>
+
+            <!-- ⑤ securepanel 관리자 -->
+            <div id="proto-admin" class="proto-screen">
+              <div style="background:#1a1a2e;border-radius:10px;padding:16px;color:white;">
+                <div style="font-size:11px;color:#aaa;margin-bottom:4px;">securepanel / EDUCATIONS</div>
+                <div style="font-size:16px;font-weight:700;color:#4fc3f7;margin-bottom:12px;">📊 인지도 조사 응답 목록</div>
+
+                <!-- 필터 바 -->
+                <div style="background:#16213e;border-radius:6px;padding:10px;margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                  <span style="font-size:11px;color:#aaa;">필터:</span>
+                  <select style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;"><option>2026년</option><option>2025년</option></select>
+                  <select style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;"><option>전체 연령</option><option>10대</option><option>20대</option><option>30대</option><option>40대</option><option>50대 이상</option></select>
+                  <input placeholder="이름/아이디 검색" style="background:#0d1b2a;color:white;border:1px solid #444;border-radius:4px;padding:4px 8px;font-size:11px;width:140px;">
+                  <span style="font-size:11px;color:#4fc3f7;margin-left:auto;">총 41,254건</span>
+                </div>
+
+                <!-- 테이블 -->
+                <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                  <thead><tr style="border-bottom:1px solid #444;color:#aaa;">
+                    <th style="padding:6px;text-align:left;">응답자</th><th style="padding:6px;">연령</th><th style="padding:6px;">Q1</th><th style="padding:6px;">Q2</th><th style="padding:6px;">Q3</th><th style="padding:6px;">Q4</th><th style="padding:6px;">Q5</th><th style="padding:6px;">총점</th><th style="padding:6px;">응답일</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">한정환</td><td style="padding:6px;text-align:center;">30대</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">19</td><td style="padding:6px;">2026.04.09</td></tr>
+                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">김도영</td><td style="padding:6px;text-align:center;">20대</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;">3</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">16</td><td style="padding:6px;">2026.04.08</td></tr>
+                    <tr style="border-bottom:1px solid #2a2a3e;"><td style="padding:6px;color:#4fc3f7;">박선아</td><td style="padding:6px;text-align:center;">10대</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;">4</td><td style="padding:6px;text-align:center;color:#4fc3f7;font-weight:700;">20</td><td style="padding:6px;">2026.04.07</td></tr>
+                  </tbody>
+                </table>
+
+                <!-- 통계 요약 -->
+                <div style="margin-top:14px;background:#16213e;border-radius:6px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:#4fc3f7;margin-bottom:8px;">📈 문항별 평균 (2026년)</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
+                      <div style="font-size:10px;color:#aaa;">Q1 인지 여부</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">92.49</div>
+                    </div>
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
+                      <div style="font-size:10px;color:#aaa;">Q2 제재 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">91.25</div>
+                    </div>
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
+                      <div style="font-size:10px;color:#aaa;">Q3 책임 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">92.50</div>
+                    </div>
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
+                      <div style="font-size:10px;color:#aaa;">Q4 TUE 인지</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">90.0</div>
+                    </div>
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;">
+                      <div style="font-size:10px;color:#aaa;">Q5 교육 효과</div><div style="font-size:18px;font-weight:800;color:#4fc3f7;">91.75</div>
+                    </div>
+                    <div style="flex:1;background:#0d1b2a;border-radius:6px;padding:8px;text-align:center;min-width:80px;border:1px solid #4fc3f7;">
+                      <div style="font-size:10px;color:#aaa;">종합</div><div style="font-size:18px;font-weight:800;color:#fff;">91.6</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top:10px;background:#16213e;border-radius:6px;padding:12px;">
+                  <div style="font-size:12px;font-weight:700;color:#4fc3f7;margin-bottom:8px;">👥 연령별 응답 현황</div>
+                  <table style="width:100%;font-size:11px;border-collapse:collapse;">
+                    <tr style="color:#aaa;border-bottom:1px solid #333;"><th style="padding:4px;text-align:left;">연령</th><th style="padding:4px;text-align:right;">10대</th><th style="padding:4px;text-align:right;">20대</th><th style="padding:4px;text-align:right;">30대</th><th style="padding:4px;text-align:right;">40대</th><th style="padding:4px;text-align:right;">50대+</th><th style="padding:4px;text-align:right;color:#4fc3f7;">계</th></tr>
+                    <tr><td style="padding:4px;">응답수</td><td style="padding:4px;text-align:right;">12,714</td><td style="padding:4px;text-align:right;">12,737</td><td style="padding:4px;text-align:right;">8,352</td><td style="padding:4px;text-align:right;">5,590</td><td style="padding:4px;text-align:right;">1,861</td><td style="padding:4px;text-align:right;font-weight:700;color:#4fc3f7;">41,254</td></tr>
+                  </table>
+                </div>
+
+                <div style="font-size:11px;color:#666;margin-top:8px;">
+                  <strong>개발:</strong> <code>securepanel/educations/surveyresponse/</code> 에 Django Admin 모델 등록. 엑셀 다운로드 action 추가.
+                </div>
+              </div>
+            </div>
+
+            <!-- ⑥ 오류 처리 가이드 -->
+            <div id="proto-errors" class="proto-screen">
+              <div style="background:#fff5f5;border:1px solid #ef9a9a;border-radius:10px;padding:16px;">
+                <div style="font-size:16px;font-weight:800;color:#c62828;margin-bottom:12px;">⚠️ 오류 처리 & 방어 로직 가이드</div>
+                <p style="font-size:12px;color:#666;margin:0 0 14px;">인지도 조사를 완료하지 않으면 <strong style="color:#c62828;">절대 수강완료 처리되지 않도록</strong> 아래 모든 시나리오를 반드시 방어해야 합니다.</p>
+
+                <!-- 시나리오 1 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #c62828;">
+                  <div style="font-weight:700;font-size:13px;color:#c62828;">🚨 시나리오 1: 설문 도중 페이지 이탈 (뒤로가기/다른 링크 클릭)</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 사용자가 설문 도중 사이드바 메뉴, 브라우저 뒤로가기, 상단 메뉴 클릭 시 응답이 유실되고 수료 불가 상태로 남음</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li><code>beforeunload</code> 이벤트: "인지도 조사를 완료해야 수료가 가능합니다. 정말 나가시겠습니까?" 확인 팝업</li>
+                      <li><code>popstate</code> (뒤로가기) 감지: 히스토리 조작으로 이탈 차단</li>
+                      <li>사이드바/상단 메뉴 링크에 <code>onclick</code> 가드: 설문 진행 중이면 확인 모달 표시</li>
+                    </ul>
+                  </div>
+                  <div style="background:#fff3e0;border-radius:6px;padding:8px;margin-top:6px;font-size:11px;">
+                    <strong>💡 UI 안내문구 (설문 상단에 고정):</strong><br>
+                    "⚠️ 인지도 조사를 완료해야 교육 수료가 가능합니다. 페이지를 벗어나면 응답이 저장되지 않습니다."
+                  </div>
+                </div>
+
+                <!-- 시나리오 2 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #c62828;">
+                  <div style="font-weight:700;font-size:13px;color:#c62828;">🚨 시나리오 2: 브라우저/탭 강제 종료</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 브라우저 닫기, 기기 종료, 앱 전환(모바일) 시 응답이 날아감</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li>각 문항 선택 시마다 <code>localStorage</code>에 임시 저장 (key: <code>survey_draft_{userId}_{year}</code>)</li>
+                      <li>재진입 시 localStorage에서 복원: "이전에 작성 중이던 응답이 있습니다. 이어서 하시겠습니까?"</li>
+                      <li>제출 성공 시에만 localStorage 삭제</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 3 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #c62828;">
+                  <div style="font-weight:700;font-size:13px;color:#c62828;">🚨 시나리오 3: 네트워크 오류 / 서버 오류 (제출 실패)</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> "제출하기" 클릭했으나 네트워크 끊김/서버 500 에러로 저장 실패. 사용자는 완료된 줄 알고 나감</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li>제출 API 응답이 <code>200 OK</code> + <code>success: true</code>일 때만 수료 처리로 이동</li>
+                      <li>실패 시: "제출에 실패했습니다. 다시 시도해주세요." 에러 토스트 + <strong>재시도 버튼</strong> 표시</li>
+                      <li>제출 버튼 클릭 후 로딩 스피너 표시 + 중복 클릭 방지 (disabled)</li>
+                      <li>3회 연속 실패 시: "네트워크 상태를 확인 후 다시 시도해주세요" + 고객센터 안내</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 4 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #e65100;">
+                  <div style="font-weight:700;font-size:13px;color:#e65100;">⚡ 시나리오 4: 세션 만료 (장시간 방치)</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 설문 페이지 열어놓고 30분+ 방치 → 세션 만료 → 제출 시 401/403 에러</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li>제출 시 401/403 응답이면: "세션이 만료되었습니다. 로그인 후 다시 시도해주세요." + 로그인 페이지 이동</li>
+                      <li>localStorage에 임시 저장된 응답이 있으므로 로그인 후 복원 가능</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 5 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #e65100;">
+                  <div style="font-weight:700;font-size:13px;color:#e65100;">⚡ 시나리오 5: 중복 제출 / 새로고침</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 느린 네트워크에서 제출 버튼 연타, 또는 제출 직후 새로고침하여 중복 데이터 생성</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li><strong>프론트:</strong> 제출 클릭 즉시 버튼 disabled + 로딩 스피너</li>
+                      <li><strong>백엔드:</strong> <code>SurveyResponse</code>에 <code>unique_together = ['user', 'year']</code> → DB 레벨 중복 방지</li>
+                      <li>이미 존재하면 에러 대신 "이미 제출 완료" 안내 → 수료 화면으로 이동</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 6 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #e65100;">
+                  <div style="font-weight:700;font-size:13px;color:#e65100;">⚡ 시나리오 6: 미응답 문항 제출 시도</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 일부 문항에 응답하지 않고 제출 시도</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li>모든 5문항 응답 전까지 "제출하기" 버튼 <strong>비활성화(disabled)</strong> 상태 유지</li>
+                      <li>미응답 문항에 빨간 테두리 + "응답해주세요" 표시</li>
+                      <li>백엔드에서도 5문항 모두 있는지 재검증 (프론트만 믿지 않기)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 7 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #1565c0;">
+                  <div style="font-weight:700;font-size:13px;color:#1565c0;">📱 시나리오 7: 모바일 특수 상황</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 전화 수신, 다른 앱 전환, 화면 잠금 시 페이지 상태 유실 (iOS Safari 특히)</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li><code>visibilitychange</code> 이벤트: 탭 비활성 시 localStorage에 자동 임시 저장</li>
+                      <li><code>pagehide</code> / <code>freeze</code> 이벤트 감지 (iOS Safari 대응)</li>
+                      <li>페이지 복귀 시 세션 유효성 체크 → 만료 시 자동 저장분 복원 안내</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 시나리오 8 -->
+                <div style="background:white;border-radius:8px;padding:12px;margin-bottom:10px;border-left:4px solid #1565c0;">
+                  <div style="font-weight:700;font-size:13px;color:#1565c0;">🔒 시나리오 8: 수료 처리 무결성</div>
+                  <div style="font-size:12px;color:#555;margin-top:6px;">
+                    <div><strong>문제:</strong> 인지도 조사를 우회하고 수료 API를 직접 호출하여 수료 처리되는 경우</div>
+                    <div style="margin-top:4px;"><strong>방어:</strong></div>
+                    <ul style="margin:4px 0 0 16px;padding:0;font-size:11px;">
+                      <li><strong>수료 처리 API에서 반드시 체크:</strong> <code>SurveyResponse.objects.filter(user=user, year=2026).exists()</code></li>
+                      <li>False이면 수료 거부 + "인지도 조사를 먼저 완료해주세요" 응답</li>
+                      <li>프론트뿐 아니라 <strong>백엔드에서 이중으로 검증</strong> (프론트 조작 방지)</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- 사용자 안내 UI -->
+                <div style="background:white;border:2px solid #1565c0;border-radius:8px;padding:12px;margin-top:14px;">
+                  <div style="font-weight:700;font-size:13px;color:#1565c0;margin-bottom:8px;">📋 설문 페이지 상단 고정 유의사항 (실제 UI)</div>
+                  <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;line-height:1.8;">
+                    <div style="font-weight:700;color:#1565c0;margin-bottom:4px;">📌 인지도 조사 안내</div>
+                    ✅ 모든 문항(5개)에 응답해야 제출이 가능합니다.<br>
+                    ✅ 제출 완료 후 교육 수료가 자동으로 처리됩니다.<br>
+                    ⚠️ <strong>페이지를 벗어나면 응답이 저장되지 않습니다.</strong> 조사를 끝까지 완료해주세요.<br>
+                    ⚠️ <strong>뒤로가기, 새로고침, 다른 메뉴 클릭 시</strong> 작성 중인 응답이 사라질 수 있습니다.<br>
+                    ❓ 오류 발생 시 <strong>페이지를 새로고침</strong>하면 이전 응답이 복원됩니다.
+                  </div>
+                </div>
+
+                <!-- 체크리스트 -->
+                <div style="background:white;border:2px solid #c62828;border-radius:8px;padding:12px;margin-top:10px;">
+                  <div style="font-weight:700;font-size:13px;color:#c62828;margin-bottom:8px;">✅ 개발 완료 전 체크리스트</div>
+                  <div style="font-size:12px;line-height:2;">
+                    <div>☐ <code>beforeunload</code> + <code>popstate</code> 이탈 방지 동작 확인</div>
+                    <div>☐ 사이드바/상단메뉴 클릭 시 확인 모달 동작 확인</div>
+                    <div>☐ localStorage 임시 저장 → 재진입 시 복원 동작 확인</div>
+                    <div>☐ 네트워크 끊긴 상태에서 제출 → 에러 토스트 + 재시도 버튼 확인</div>
+                    <div>☐ 중복 제출 방지 (프론트 disabled + 백엔드 unique) 확인</div>
+                    <div>☐ 5문항 미응답 시 제출 버튼 비활성 확인</div>
+                    <div>☐ 세션 만료 후 제출 → 로그인 유도 + 복원 확인</div>
+                    <div>☐ 수료 API에서 인지도 조사 완료 여부 이중 체크 확인</div>
+                    <div>☐ 모바일(iOS Safari/Chrome) 앱 전환 후 복귀 테스트</div>
+                    <div>☐ securepanel 관리자 화면에서 응답 조회/엑셀 다운로드 확인</div>
+                  </div>
                 </div>
               </div>
             </div>
