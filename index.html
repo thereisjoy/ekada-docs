@@ -6,6 +6,7 @@
 <title>교육eKADA - 남은 작업 목록</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <style>
 :root { --kada-primary: #4285f4; --kada-bg: #f5f7fb; }
 * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
@@ -45,6 +46,36 @@ body { background: var(--kada-bg); margin: 0; }
 .summary-num { font-size: 32px; font-weight: 800; }
 .ref-link { color: var(--kada-primary); text-decoration: none; font-size: 13px; }
 .ref-link:hover { text-decoration: underline; }
+
+/* Prototype embed */
+.proto-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 16px; }
+.proto-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #ddd; background: white; color: #666; cursor: pointer; transition: all .15s; }
+.proto-tab.active { background: var(--kada-primary); color: white; border-color: var(--kada-primary); }
+.proto-tab:hover:not(.active) { border-color: var(--kada-primary); color: var(--kada-primary); }
+.proto-screen { display: none; }
+.proto-screen.active { display: block; }
+.step-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin: 16px 0; flex-wrap: wrap; }
+.step-item { display: flex; flex-direction: column; align-items: center; min-width: 70px; }
+.step-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 2px solid #ddd; color: #999; background: white; }
+.step-circle.done { background: #00c853; border-color: #00c853; color: white; }
+.step-circle.current { background: var(--kada-primary); border-color: var(--kada-primary); color: white; }
+.step-circle.new-step { background: #ff6b35; border-color: #ff6b35; color: white; }
+.step-circle.skip { background: #aaa; border-color: #aaa; color: white; }
+.step-label { font-size: 10px; margin-top: 4px; color: #999; text-align: center; }
+.step-label.current { color: var(--kada-primary); font-weight: 700; }
+.step-label.new-label { color: #ff6b35; font-weight: 700; }
+.step-line { width: 30px; height: 2px; background: #ddd; margin-bottom: 16px; }
+.step-line.done { background: #00c853; }
+.survey-q { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; }
+.survey-q:last-child { border: none; margin-bottom: 0; }
+.survey-q-title { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #333; }
+.survey-q-title .q-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--kada-primary); color: white; font-size: 10px; margin-right: 6px; }
+.survey-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.survey-opt { flex: 1; min-width: 100px; text-align: center; padding: 8px 4px; border: 2px solid #e8e8e8; border-radius: 8px; cursor: pointer; font-size: 12px; color: #666; transition: all .15s; }
+.survey-opt:hover { border-color: var(--kada-primary); color: var(--kada-primary); background: #f5f8ff; }
+.survey-opt.selected { border-color: var(--kada-primary); background: var(--kada-primary); color: white; }
+.new-badge { display: inline-block; background: #ff6b35; color: white; font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 3px; }
+.proto-section { background: #fafbff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px; }
 </style>
 </head>
 <body>
@@ -120,11 +151,173 @@ body { background: var(--kada-bg); margin: 0; }
           <div class="subtask"><span class="subtask-check"><i class="bi bi-circle" style="color:#ccc;"></i></span> 관리자 통계 페이지 (연령별/문항별 집계 - 기존 조사결과 포맷)</div>
         </div>
 
-        <div class="note-box">
-          <i class="bi bi-file-earmark-code" style="color:var(--kada-primary);"></i>
-          <strong>인터랙티브 프로토타입:</strong>
-          <a href="survey-prototype.html" class="ref-link ms-2" style="font-weight:700;">인지도 조사 UI/UX 흐름 보기 →</a>
+        <!-- 인라인 프로토타입 토글 -->
+        <div class="mt-3">
+          <button class="btn btn-sm" onclick="document.getElementById('survey-proto').style.display=document.getElementById('survey-proto').style.display==='none'?'block':'none'; this.querySelector('i').classList.toggle('bi-chevron-down'); this.querySelector('i').classList.toggle('bi-chevron-up');" style="background:#ff6b35;color:white;border:none;border-radius:20px;padding:6px 16px;font-weight:600;font-size:13px;">
+            <i class="bi bi-chevron-down"></i> UI/UX 인터랙션 프로토타입 보기
+          </button>
         </div>
+
+        <div id="survey-proto" style="display:none;margin-top:16px;">
+          <div class="proto-section">
+            <!-- 탭 -->
+            <div class="proto-tabs">
+              <div class="proto-tab active" onclick="showProto('overview',this)">전체 흐름</div>
+              <div class="proto-tab" onclick="showProto('video',this)">① 마지막 영상 완료</div>
+              <div class="proto-tab" onclick="showProto('survey',this)">② 인지도 조사 폼</div>
+              <div class="proto-tab" onclick="showProto('done',this)">③ 수료 완료</div>
+              <div class="proto-tab" onclick="showProto('skip',this)">④ 이미 완료 시 스킵</div>
+            </div>
+
+            <!-- 전체 흐름 -->
+            <div id="proto-overview" class="proto-screen active">
+              <div class="row g-3">
+                <div class="col-md-4" style="text-align:center;">
+                  <div style="background:#fff8f0;border-radius:10px;padding:14px;">
+                    <div style="font-size:28px;">1️⃣</div>
+                    <div style="font-weight:700;font-size:14px;margin:6px 0 2px;">1 아이디 = 1회 조사</div>
+                    <div style="font-size:12px;color:#666;">여러 교육을 들어도 인지도 조사는 <strong>딱 1번</strong></div>
+                  </div>
+                </div>
+                <div class="col-md-4" style="text-align:center;">
+                  <div style="background:#fff8f0;border-radius:10px;padding:14px;">
+                    <div style="font-size:28px;">📍</div>
+                    <div style="font-weight:700;font-size:14px;margin:6px 0 2px;">마지막 영상 뒤</div>
+                    <div style="font-size:12px;color:#666;">모든 영상 수강 완료 후 <strong>수료 전 마지막 단계</strong></div>
+                  </div>
+                </div>
+                <div class="col-md-4" style="text-align:center;">
+                  <div style="background:#fff8f0;border-radius:10px;padding:14px;">
+                    <div style="font-size:28px;">⏭️</div>
+                    <div style="font-weight:700;font-size:14px;margin:6px 0 2px;">이미 했으면 자동 스킵</div>
+                    <div style="font-size:12px;color:#666;">2번째 교육부터는 <strong>조사 단계 자동 건너뜀</strong></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                  <div style="background:#f5f5f5;border-radius:8px;padding:12px;">
+                    <div style="font-size:12px;color:#999;font-weight:600;">AS-IS (현재)</div>
+                    <div class="step-bar" style="justify-content:flex-start;">
+                      <div class="step-item"><div class="step-circle done" style="width:26px;height:26px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수강(1~N)</div></div>
+                      <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                      <div class="step-item"><div class="step-circle done" style="width:26px;height:26px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label" style="color:#00c853;">수료</div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div style="background:#fff8f0;border:1px solid #ff6b35;border-radius:8px;padding:12px;">
+                    <div style="font-size:12px;color:#ff6b35;font-weight:600;">TO-BE (개선)</div>
+                    <div class="step-bar" style="justify-content:flex-start;">
+                      <div class="step-item"><div class="step-circle done" style="width:26px;height:26px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수강(1~N)</div></div>
+                      <div class="step-line done" style="width:20px;margin-bottom:14px;"></div>
+                      <div class="step-item"><div class="step-circle new-step" style="width:26px;height:26px;font-size:10px;"><i class="bi bi-clipboard-check"></i></div><div class="step-label new-label" style="font-size:9px;">인지도조사<span class="new-badge">NEW</span></div></div>
+                      <div class="step-line" style="width:20px;margin-bottom:14px;"></div>
+                      <div class="step-item"><div class="step-circle" style="width:26px;height:26px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수료</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ① 마지막 영상 완료 -->
+            <div id="proto-video" class="proto-screen">
+              <div style="background:white;border-radius:10px;padding:16px;border:1px solid #eee;">
+                <div style="font-size:14px;font-weight:700;margin-bottom:8px;">25~26 프로스포츠 도핑방지교육</div>
+                <div class="step-bar">
+                  <div class="step-item"><div class="step-circle done"><i class="bi bi-check"></i></div><div class="step-label">수강(1)</div></div>
+                  <div class="step-line done"></div>
+                  <div class="step-item"><div class="step-circle done"><i class="bi bi-check"></i></div><div class="step-label">수강(2)</div></div>
+                  <div class="step-line done"></div>
+                  <div class="step-item"><div class="step-circle done"><i class="bi bi-check"></i></div><div class="step-label">...</div></div>
+                  <div class="step-line done"></div>
+                  <div class="step-item"><div class="step-circle done"><i class="bi bi-check"></i></div><div class="step-label">수강(6)</div></div>
+                  <div class="step-line done"></div>
+                  <div class="step-item"><div class="step-circle new-step"><i class="bi bi-clipboard-check"></i></div><div class="step-label new-label">인지도 조사<span class="new-badge">NEW</span></div></div>
+                </div>
+                <div style="background:#1a1a1a;border-radius:8px;padding:40px 0;text-align:center;">
+                  <div style="color:#00c853;font-size:28px;"><i class="bi bi-check-circle-fill"></i></div>
+                  <div style="color:white;font-size:13px;margin-top:4px;">마지막 영상 수강 완료</div>
+                </div>
+                <div style="text-align:center;margin-top:14px;">
+                  <button class="btn btn-sm" onclick="showProto('survey',document.querySelectorAll('.proto-tab')[2])" style="background:#ff6b35;color:white;border:none;border-radius:20px;padding:8px 24px;font-weight:700;font-size:14px;">
+                    <i class="bi bi-clipboard-check"></i> 인지도 조사 참여하기
+                  </button>
+                  <div style="font-size:11px;color:#999;margin-top:6px;">교육 수료를 위해 인지도 조사를 완료해주세요</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ② 인지도 조사 폼 -->
+            <div id="proto-survey" class="proto-screen">
+              <div style="background:white;border-radius:10px;padding:16px;border:1px solid #eee;">
+                <div class="step-bar" style="margin-bottom:16px;">
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수강(1~6)</div></div>
+                  <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                  <div class="step-item"><div class="step-circle current" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-clipboard-check"></i></div><div class="step-label current">인지도 조사</div></div>
+                </div>
+                <div style="background:#fff8f0;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+                  <div style="font-weight:700;font-size:14px;"><i class="bi bi-clipboard-data" style="color:#ff6b35;"></i> 2026 도핑방지 인지도 조사</div>
+                  <div style="font-size:12px;color:#666;">5문항 / 약 1분 소요 / 솔직하게 응답해주세요</div>
+                </div>
+                <div class="survey-q"><div class="survey-q-title"><span class="q-num">1</span>도핑(금지약물 사용 또는 복용)에 대해 인지하고 있습니까?</div><div class="survey-options"><div class="survey-opt" onclick="selOpt(this)">매우 그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇지 않다</div><div class="survey-opt" onclick="selOpt(this)">매우 그렇지 않다</div></div></div>
+                <div class="survey-q"><div class="survey-q-title"><span class="q-num">2</span>도핑 사실 발각 시 규정위반으로 제재 부과됨을 인지하고 있습니까?</div><div class="survey-options"><div class="survey-opt" onclick="selOpt(this)">매우 그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇지 않다</div><div class="survey-opt" onclick="selOpt(this)">매우 그렇지 않다</div></div></div>
+                <div class="survey-q"><div class="survey-q-title"><span class="q-num">3</span>사용(복용)한 약물에 대한 책임이 선수에게 있음을 인지하고 있습니까?</div><div class="survey-options"><div class="survey-opt" onclick="selOpt(this)">매우 그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇지 않다</div><div class="survey-opt" onclick="selOpt(this)">매우 그렇지 않다</div></div></div>
+                <div class="survey-q"><div class="survey-q-title"><span class="q-num">4</span>치료목적사용면책(TUE) 제도에 대해 인지하고 있습니까?</div><div class="survey-options"><div class="survey-opt" onclick="selOpt(this)">매우 그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇지 않다</div><div class="survey-opt" onclick="selOpt(this)">매우 그렇지 않다</div></div></div>
+                <div class="survey-q"><div class="survey-q-title"><span class="q-num">5</span>한국도핑방지위원회 교육/홍보활동이 효과적이라고 생각하십니까?</div><div class="survey-options"><div class="survey-opt" onclick="selOpt(this)">매우 그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇다</div><div class="survey-opt" onclick="selOpt(this)">그렇지 않다</div><div class="survey-opt" onclick="selOpt(this)">매우 그렇지 않다</div></div></div>
+                <div style="text-align:center;margin-top:12px;">
+                  <button class="btn btn-sm" onclick="showProto('done',document.querySelectorAll('.proto-tab')[3])" style="background:var(--kada-primary);color:white;border:none;border-radius:20px;padding:8px 32px;font-weight:700;">제출하기</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ③ 수료 완료 -->
+            <div id="proto-done" class="proto-screen">
+              <div style="background:white;border-radius:10px;padding:16px;border:1px solid #eee;">
+                <div class="step-bar" style="margin-bottom:16px;">
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수강(1~6)</div></div>
+                  <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">인지도 조사</div></div>
+                  <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;background:#00c853;border-color:#00c853;"><i class="bi bi-check"></i></div><div class="step-label" style="color:#00c853;font-weight:700;">수료 완료!</div></div>
+                </div>
+                <div style="text-align:center;padding:24px 0;">
+                  <div style="font-size:48px;color:#00c853;"><i class="bi bi-patch-check-fill"></i></div>
+                  <div style="font-size:20px;font-weight:800;margin:8px 0 4px;">교육 수료 완료!</div>
+                  <div style="color:#666;font-size:13px;">인지도 조사 제출 → 자동 수료 처리</div>
+                  <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;">
+                    <button class="btn btn-sm" style="background:var(--kada-primary);color:white;border:none;border-radius:16px;padding:6px 16px;">수료증 확인</button>
+                    <button class="btn btn-sm" style="background:white;color:var(--kada-primary);border:1px solid var(--kada-primary);border-radius:16px;padding:6px 16px;">교육 목록으로</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ④ 이미 완료 시 스킵 -->
+            <div id="proto-skip" class="proto-screen">
+              <div style="background:white;border-radius:10px;padding:16px;border:1px solid #eee;">
+                <div style="font-size:13px;color:#999;margin-bottom:8px;">📌 두 번째 교육 수강 시</div>
+                <div class="step-bar" style="margin-bottom:16px;">
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-check"></i></div><div class="step-label">수강 완료</div></div>
+                  <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                  <div class="step-item"><div class="step-circle skip" style="width:28px;height:28px;font-size:10px;"><i class="bi bi-skip-forward"></i></div><div class="step-label" style="text-decoration:line-through;color:#aaa;">인지도 조사</div></div>
+                  <div class="step-line done" style="width:24px;margin-bottom:14px;"></div>
+                  <div class="step-item"><div class="step-circle done" style="width:28px;height:28px;font-size:10px;background:#00c853;border-color:#00c853;"><i class="bi bi-check"></i></div><div class="step-label" style="color:#00c853;font-weight:700;">수료!</div></div>
+                </div>
+                <div style="background:#e8f5e9;border-radius:8px;padding:14px;text-align:center;">
+                  <i class="bi bi-info-circle" style="font-size:20px;color:#00c853;"></i>
+                  <div style="font-weight:700;margin:6px 0 2px;font-size:14px;">인지도 조사를 이미 완료하셨습니다</div>
+                  <div style="font-size:12px;color:#666;">2026.03.15에 참여 기록이 있어 별도 조사 없이 바로 수료 처리됩니다.</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#555;">
+                  <strong>개발 로직:</strong> <code>SurveyResponse.objects.filter(user=request.user, year=2026).exists()</code> → True이면 자동 스킵
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -236,6 +429,19 @@ body { background: var(--kada-bg); margin: 0; }
   </div>
 
 </div>
+
+<script>
+function showProto(id, tabEl) {
+  document.querySelectorAll('.proto-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('proto-' + id).classList.add('active');
+  document.querySelectorAll('.proto-tab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+}
+function selOpt(el) {
+  el.parentElement.querySelectorAll('.survey-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
 
 <!-- Footer -->
 <div style="background:#1a1a2e;color:white;padding:24px 0;text-align:center;">
