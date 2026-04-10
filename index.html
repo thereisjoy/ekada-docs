@@ -1063,7 +1063,7 @@ function backToAdminList() {
 
   function showBubble(anchorEl) {
     if (getCount() >= 50) return;
-    if (Math.random() >= 0.3) return;
+    if (Math.random() >= 0.15) return;
     incCount();
 
     document.querySelectorAll('.cheer-bubble').forEach(function(b) { b.remove(); });
@@ -1106,14 +1106,17 @@ function backToAdminList() {
     showBubble(target);
   }
 
-  var lastTouchTime = 0;
+  var suppressNextClick = false;
   document.addEventListener('touchstart', function(e) {
-    lastTouchTime = Date.now();
+    suppressNextClick = true;
     handleInteraction(e.target);
   }, { passive: true });
 
   document.addEventListener('click', function(e) {
-    if (Date.now() - lastTouchTime < 500) return;
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      return;
+    }
     handleInteraction(e.target);
   });
 
