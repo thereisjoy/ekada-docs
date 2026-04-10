@@ -961,5 +961,125 @@ function backToAdminList() {
   </div>
 </div>
 
+
+<!-- sosohan encouragement features -->
+<style>
+#scroll-toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: #2a2356; color: white;
+  padding: 12px 20px; border-radius: 12px;
+  font-size: 14px; font-weight: 500;
+  box-shadow: 0 4px 20px rgba(42,35,86,0.35);
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none; z-index: 9999;
+  white-space: nowrap;
+}
+#scroll-toast.show { opacity: 1; transform: translateY(0); }
+
+.cheer-bubble {
+  position: absolute; top: -10px; left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: #4285f4; color: white;
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 3px 12px rgba(66,133,244,0.35);
+  white-space: nowrap; z-index: 100;
+  opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.cheer-bubble.show {
+  opacity: 1; transform: translateX(-50%) translateY(-8px);
+}
+
+.task-card {
+  position: relative;
+  overflow: visible !important;
+}
+.task-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(66,133,244,0.13) !important;
+}
+.star-sparkle {
+  position: absolute;
+  pointer-events: none;
+  font-size: 11px;
+  color: #4285f4;
+  opacity: 0;
+  animation: sparkle-fade 0.8s ease forwards;
+  z-index: 200;
+  user-select: none;
+}
+@keyframes sparkle-fade {
+  0%   { opacity: 0; transform: translate(0,0) scale(0.5); }
+  30%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.2); }
+}
+</style>
+
+<div id="scroll-toast">다 읽었군요... 고생했어요 🫡</div>
+
+<script>
+(function() {
+  // 1. 스크롤 → 하단 가까워지면 토스트
+  var toastShown = false;
+  var toast = document.getElementById('scroll-toast');
+  window.addEventListener('scroll', function() {
+    if (toastShown) return;
+    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 120) {
+      toastShown = true;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 3500);
+    }
+  }, { passive: true });
+
+  // 2. 카드 클릭 → 격려 말풍선
+  var cheers = [
+    '이것도 언젠간 끝납니다 ☕',
+    '파이팅... 진심으로 🙏',
+    '오늘의 당신, 대단해요 💪',
+    '묵묵히 해내고 있잖아요 🌱',
+    '당신 없인 KADA도 없어요 ✨'
+  ];
+  var idx = 0;
+
+  document.querySelectorAll('.task-card').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('button,a,input,select')) return;
+      var old = card.querySelector('.cheer-bubble');
+      if (old) old.remove();
+      var bubble = document.createElement('div');
+      bubble.className = 'cheer-bubble';
+      bubble.textContent = cheers[idx % cheers.length];
+      idx++;
+      card.appendChild(bubble);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { bubble.classList.add('show'); });
+      });
+      setTimeout(function() {
+        bubble.classList.remove('show');
+        setTimeout(function() { bubble.remove(); }, 350);
+      }, 2200);
+    });
+
+    // 3. 호버 → 작은 별 반짝
+    card.addEventListener('mouseenter', function(e) {
+      var rect = card.getBoundingClientRect();
+      var star = document.createElement('span');
+      star.className = 'star-sparkle';
+      star.textContent = '✶';
+      var sx = (Math.random() - 0.5) * 28 + 'px';
+      var sy = (-18 - Math.random() * 10) + 'px';
+      star.style.setProperty('--sx', sx);
+      star.style.setProperty('--sy', sy);
+      star.style.left = (e.clientX - rect.left) + 'px';
+      star.style.top = (e.clientY - rect.top) + 'px';
+      card.appendChild(star);
+      setTimeout(function() { star.remove(); }, 850);
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
