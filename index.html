@@ -1046,12 +1046,16 @@ function backToAdminList() {
   ];
   var lastMsgIdx = -1;
 
-  function getCount() {
-    return parseInt(sessionStorage.getItem('encourageCount') || '0', 10);
+  // 클릭 패턴 [3, 5, 7, 9] 사이클 - sessionStorage로 새로고침 후에도 유지
+  var PATTERN = [3, 5, 7, 9];
+  var patternIndex = parseInt(sessionStorage.getItem('patternIndex') || '0', 10);
+  var clicksUntilNext = parseInt(sessionStorage.getItem('clicksUntilNext') || String(PATTERN[0]), 10);
+
+  function savePattern() {
+    sessionStorage.setItem('patternIndex', patternIndex);
+    sessionStorage.setItem('clicksUntilNext', clicksUntilNext);
   }
-  function incCount() {
-    sessionStorage.setItem('encourageCount', getCount() + 1);
-  }
+
   function pickMsg() {
     var idx;
     do {
@@ -1062,10 +1066,6 @@ function backToAdminList() {
   }
 
   function showBubble(anchorEl) {
-    if (getCount() >= 50) return;
-    if (Math.random() >= 0.15) return;
-    incCount();
-
     document.querySelectorAll('.cheer-bubble').forEach(function(b) { b.remove(); });
 
     var rect = anchorEl.getBoundingClientRect();
@@ -1103,7 +1103,14 @@ function backToAdminList() {
     if (isExternalLink(el)) return;
     var target = findTarget(el);
     if (!target) return;
-    showBubble(target);
+
+    clicksUntilNext--;
+    if (clicksUntilNext <= 0) {
+      showBubble(target);
+      patternIndex = (patternIndex + 1) % PATTERN.length;
+      clicksUntilNext = PATTERN[patternIndex];
+    }
+    savePattern();
   }
 
   var suppressNextClick = false;
