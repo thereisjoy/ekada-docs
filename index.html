@@ -968,34 +968,39 @@ function backToAdminList() {
 
 <!-- sosohan encouragement features -->
 <style>
+/* 스크롤 토스트 */
 #scroll-toast {
-  position: fixed; bottom: 28px; right: 28px;
+  position: fixed; bottom: 24px; right: 16px;
   background: #2a2356; color: white;
-  padding: 12px 20px; border-radius: 12px;
-  font-size: 14px; font-weight: 500;
-  box-shadow: 0 4px 20px rgba(42,35,86,0.35);
+  padding: 12px 18px; border-radius: 12px;
+  font-size: 14px; font-weight: 500; line-height: 1.4;
+  box-shadow: 0 4px 20px rgba(42,35,86,0.4);
   opacity: 0; transform: translateY(12px);
   transition: opacity 0.4s ease, transform 0.4s ease;
-  pointer-events: none; z-index: 9999;
-  white-space: nowrap;
+  pointer-events: none; z-index: 99999;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
 }
 #scroll-toast.show { opacity: 1; transform: translateY(0); }
 
+/* 격려 말풍선 */
 .cheer-bubble {
   position: fixed;
   background: #4285f4; color: white;
-  padding: 7px 14px; border-radius: 20px;
-  font-size: 14px; font-weight: 500;
-  box-shadow: 0 3px 12px rgba(66,133,244,0.35);
-  white-space: nowrap; z-index: 10000;
+  padding: 8px 16px; border-radius: 20px;
+  font-size: 14px; font-weight: 500; line-height: 1.4;
+  box-shadow: 0 3px 16px rgba(66,133,244,0.45);
+  white-space: nowrap; z-index: 99998;
   opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
   pointer-events: none;
   transform: translateX(-50%) translateY(-4px);
+  max-width: calc(100vw - 32px);
 }
 .cheer-bubble.show {
-  opacity: 1; transform: translateX(-50%) translateY(-12px);
+  opacity: 1; transform: translateX(-50%) translateY(-14px);
 }
 
+/* 카드 호버 */
 .task-card {
   position: relative;
   overflow: visible !important;
@@ -1004,14 +1009,16 @@ function backToAdminList() {
   transform: translateY(-3px) !important;
   box-shadow: 0 8px 24px rgba(66,133,244,0.13) !important;
 }
+
+/* 별 반짝 */
 .star-sparkle {
-  position: absolute;
+  position: fixed;
   pointer-events: none;
-  font-size: 11px;
+  font-size: 13px;
   color: #4285f4;
   opacity: 0;
   animation: sparkle-fade 0.8s ease forwards;
-  z-index: 200;
+  z-index: 99997;
   user-select: none;
 }
 @keyframes sparkle-fade {
@@ -1019,18 +1026,30 @@ function backToAdminList() {
   30%  { opacity: 0.85; }
   100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.2); }
 }
+
+@media (max-width: 600px) {
+  #scroll-toast { font-size: 15px; padding: 13px 18px; bottom: 20px; right: 12px; }
+  .cheer-bubble { font-size: 15px; padding: 9px 16px; }
+  .star-sparkle { font-size: 15px; }
+}
 </style>
 
 <div id="scroll-toast">다 읽었군요... 고생했어요 🫡</div>
 
 <script>
 (function() {
-  // 1. 스크롤 → 하단 가까워지면 토스트
+  var LIMIT = 50;
+  var COUNT_KEY = 'cheerCount';
+
+  function getCount() { return parseInt(sessionStorage.getItem(COUNT_KEY) || '0', 10); }
+  function incCount() { sessionStorage.setItem(COUNT_KEY, getCount() + 1); }
+
+  // 1. 스크롤 토스트
   var toastShown = false;
   var toast = document.getElementById('scroll-toast');
   window.addEventListener('scroll', function() {
     if (toastShown) return;
-    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 120) {
+    if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 140) {
       toastShown = true;
       toast.classList.add('show');
       setTimeout(function() { toast.classList.remove('show'); }, 3500);
@@ -1050,38 +1069,28 @@ function backToAdminList() {
   ];
   var lastMsgIdx = -1;
 
-  // 구버전 sessionStorage 키 정리
-  ['encourageCount', 'msgIndex'].forEach(function(k) { sessionStorage.removeItem(k); });
-
-  // 클릭 패턴 [3, 5, 7, 9] 사이클 - sessionStorage로 새로고침 후에도 유지
-  var PATTERN = [3, 5, 7, 9];
-  var patternIndex = parseInt(sessionStorage.getItem('patternIndex') || '0', 10);
-  var rawClicks = parseInt(sessionStorage.getItem('clicksUntilNext') || 'NaN', 10);
-  var clicksUntilNext = (isNaN(rawClicks) || rawClicks <= 0) ? PATTERN[patternIndex] : rawClicks;
-
-  function savePattern() {
-    sessionStorage.setItem('patternIndex', patternIndex);
-    sessionStorage.setItem('clicksUntilNext', clicksUntilNext);
-  }
-
   function pickMsg() {
     var idx;
-    do {
-      idx = Math.floor(Math.random() * cheers.length);
-    } while (idx === lastMsgIdx && cheers.length > 1);
+    do { idx = Math.floor(Math.random() * cheers.length); }
+    while (idx === lastMsgIdx && cheers.length > 1);
     lastMsgIdx = idx;
     return cheers[idx];
   }
 
-  function showBubble(anchorEl) {
+  function showBubble(x, y) {
+    if (getCount() >= LIMIT) return;
+    if (Math.random() > 0.30) return; // 30% 확률
+
+    incCount();
     document.querySelectorAll('.cheer-bubble').forEach(function(b) { b.remove(); });
 
-    var rect = anchorEl.getBoundingClientRect();
     var bubble = document.createElement('div');
     bubble.className = 'cheer-bubble';
     bubble.textContent = pickMsg();
-    bubble.style.left = (rect.left + rect.width / 2) + 'px';
-    bubble.style.top = rect.top + 'px';
+    // 화면 가장자리 넘지 않게 clamp
+    var bx = Math.max(80, Math.min(window.innerWidth - 80, x));
+    bubble.style.left = bx + 'px';
+    bubble.style.top = y + 'px';
     document.body.appendChild(bubble);
 
     requestAnimationFrame(function() {
@@ -1093,11 +1102,24 @@ function backToAdminList() {
     }, 2200);
   }
 
+  // 3. 별 반짝
+  function showStar(x, y) {
+    var star = document.createElement('span');
+    star.className = 'star-sparkle';
+    star.textContent = '✶';
+    var sx = (Math.random() - 0.5) * 30 + 'px';
+    var sy = (-20 - Math.random() * 12) + 'px';
+    star.style.setProperty('--sx', sx);
+    star.style.setProperty('--sy', sy);
+    star.style.left = x + 'px';
+    star.style.top = y + 'px';
+    document.body.appendChild(star);
+    setTimeout(function() { star.remove(); }, 900);
+  }
+
   function isExternalLink(el) {
     var a = el.closest('a');
-    if (!a) return false;
-    var href = a.getAttribute('href') || '';
-    return /^https?:\/\//i.test(href);
+    return a && /^https?:\/\//i.test(a.getAttribute('href') || '');
   }
 
   function findTarget(el) {
@@ -1107,53 +1129,35 @@ function backToAdminList() {
            el.closest('.task-card');
   }
 
-  function handleInteraction(el) {
-    if (isExternalLink(el)) return;
-    var target = findTarget(el);
-    if (!target) return;
-
-    clicksUntilNext--;
-    if (clicksUntilNext <= 0) {
-      showBubble(target);
-      patternIndex = (patternIndex + 1) % PATTERN.length;
-      clicksUntilNext = PATTERN[patternIndex];
-    }
-    savePattern();
-  }
-
-  var suppressNextClick = false;
+  // 터치: 말풍선 + 별
+  var suppressClick = false;
   document.addEventListener('touchstart', function(e) {
-    suppressNextClick = true;
-    handleInteraction(e.target);
+    suppressClick = true;
+    var touch = e.changedTouches[0];
+    var el = e.target;
+    if (isExternalLink(el)) return;
+    if (!findTarget(el)) return;
+    var x = touch.clientX, y = touch.clientY;
+    showBubble(x, y);
+    showStar(x, y);
   }, { passive: true });
 
+  // 클릭(데스크탑): 말풍선
   document.addEventListener('click', function(e) {
-    if (suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
-    handleInteraction(e.target);
+    if (suppressClick) { suppressClick = false; return; }
+    var el = e.target;
+    if (isExternalLink(el)) return;
+    if (!findTarget(el)) return;
+    showBubble(e.clientX, e.clientY);
   });
 
-  // 3. 호버 → 작은 별 반짝 (task-card)
+  // 데스크탑 호버 → 별
   document.querySelectorAll('.task-card').forEach(function(card) {
     card.addEventListener('mouseenter', function(e) {
-      var rect = card.getBoundingClientRect();
-      var star = document.createElement('span');
-      star.className = 'star-sparkle';
-      star.textContent = '✶';
-      var sx = (Math.random() - 0.5) * 28 + 'px';
-      var sy = (-18 - Math.random() * 10) + 'px';
-      star.style.setProperty('--sx', sx);
-      star.style.setProperty('--sy', sy);
-      star.style.left = (e.clientX - rect.left) + 'px';
-      star.style.top = (e.clientY - rect.top) + 'px';
-      card.appendChild(star);
-      setTimeout(function() { star.remove(); }, 850);
+      showStar(e.clientX, e.clientY);
     });
   });
 })();
 </script>
-
 </body>
 </html>
